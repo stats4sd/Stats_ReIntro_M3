@@ -6,7 +6,11 @@ date: "2025-02-20"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(treemap)
 ```
+
+Add a sentence here
 
 ## Libraries
 ```{r}
