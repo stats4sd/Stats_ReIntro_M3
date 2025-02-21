@@ -1,0 +1,51 @@
+---
+title: "Producing results"
+output: word_document
+date: "2025-02-20"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Libraries
+```{r}
+library(tidyverse)
+```
+
+## Read data
+```{r}
+Whale<-read.csv("Data/Humpback.csv") %>% filter(length.m.>0)
+Whale$sex<-factor(Whale$sex, levels = c("Male", "Female", "Hermaphrodite", "Unknown"))
+
+```
+
+
+### Plot % Male vs Year
+```{r}
+male_year<-Whale %>%
+  group_by(Year) %>%
+  summarise(Prop_male=sum(sex=="Male")/n(),n=n())%>%
+  filter(Year>=1949 & Year<=1962)
+
+ggplot(male_year, aes(x=Year,y=Prop_male),)+
+  geom_line()+
+  geom_smooth(linewidth = 0.5,colour = "red", se = FALSE) +
+  geom_line(aes(y=0.5), linetype=2)+
+  coord_cartesian(ylim = c(0,1))+
+  labs(x="Year",y="% Male")
+```
+
+```{r}
+whale1<-Whale %>%
+  filter(sex =="Male" | sex =="Female") %>%
+  droplevels()
+
+prop.table(table(whale1$sex))
+
+
+```
+
+## Prop of male/female, removiong other sexs
+
+  

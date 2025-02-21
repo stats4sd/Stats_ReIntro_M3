@@ -1,0 +1,766 @@
+---
+title: "Module 3 - Hypothesis Testing"
+output: 
+  learnr::tutorial:
+    css: css/style.css
+runtime: shiny_prerendered
+description: > 
+  Hypothesis Testing Module for the 2025 Envision course
+editor_options: 
+  markdown: 
+    wrap: 72
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
+library(tidyverse)
+library(shiny)
+library(gt)
+library(plotly)
+library(png)
+library(jpeg)
+library(grid)
+
+Whale<-read.csv("Data/Humpback.csv") %>% filter(length.m.>0)
+Whale$sex<-factor(Whale$sex, levels = c("Male", "Female", "Hermaphrodite", "Unknown"))
+
+
+choices<-c("Boxplot"="boxplot",
+"Histogram"="histogram",
+"Density Plot"="density")
+
+
+plot_theme<-theme_light()+
+  theme(plot.title=element_text(face =2,size=18),
+        axis.title=element_text(face =2,size=14),
+        plot.subtitle=element_text(face =3,size=14),
+        axis.text=element_text(face =1,size=12),
+        strip.text=element_text(face =1,size=12))
+
+
+Whale %>%
+  ungroup() %>%
+      summarise("Number of whales"=n(),
+                "Mean length"=mean(length.m.)%>%round(1),
+                "Median length"=median(length.m.)%>%round(1),
+                "Minimum"=min(length.m.)%>%round(1),
+                "Maximum"=max(length.m.)%>%round(1),
+                "Range"=(max(length.m.)-min(length.m.))%>%round(1),
+                "Standard Deviation"=sd(length.m.)%>%round(1),
+                "Variance"=var(length.m.)%>%round(),
+                )%>%
+  gather(Statistic,Value) ->table_stat
+```
+
+## Introduction
+
+In this third workbook, we are going to be taking a closer look at hypothesis testing.
+ 
+Sampling consists of selecting some part of a population to observe, so one may estimate something about the whole population, or infer and test hypothesis about the population characteristics, or fit models that explain or predict some population outcome. In this workbook we are going to discuss some general ideas about sampling and their relationship to estimation. In Workbook 3 we are going to discuss inference and hypothesis testing and in Module 4 and 5 model fitting.
+As an example of sampling for estimation, in order to estimate the amount of lichen available as food for caribou, a biologists collects lichen from selected small plots within the study area. Based on the dry weight of the sample collected, the available amount of food for the whole region can be estimated. Similarly, to estimate the average weight of the individuals of a bird species, some individuals are captured, weighted (and released) and based on these measurements, the average weight of the individuals can be estimated.
+
+Sampling is the process used to collect the data, estimation uses the sampled data to provide an estimate of a population parameter using such data.   
+
+In this session we will cover:
+
+-   A brief description of some of the most used types of sampling units in environmental sciences
+
+-   What is sampling and what are the desirable properties of a good sampling scheme
+
+-   The definition and some examples of the two types of errors that we will find when using sampled data to estimate population characteristics
+
+-   The basic sampling scheme, the Simple Random Sampling, the estimation of population characteristics under this scheme and the computation of Confidence Intervals
+
+-   Finally, we will review some of the most commons sampling strategies used in environmental sciences.
+
+In these workbooks all output produced will come from the use of R, and all of the code used in the workbooks can be found on GitHub here: [CHANGE GITHUB REPOSITORY] <https://github.com/stats4sd/Stats_ReIntro_M1>. But the principles are identical regardless of which data analysis tool is being used.Whichever tool is being used for data analysis - it will require that the user is familiar enough with it to be able to generate any sort of summary or plot or transformation that they might suddenly think could be useful!
+
+## Data being used in this workbook
+In this session we are going to use a public dataset produced by the Ocean Biodiversity Information system (OBIS). It contains the Historic whale catch records from Australian whaling stations (1925-1978). The full data set and other details can be found here <https://obis.org/dataset/43e4c2cc-5886-427f-a4a9-d47d2635d246>. It contains 38267 records, but we will use a subset: the data corresponding to the most common caught whale, the Humpback (Megaptera novaeangliae). 
+
+We have also edited it to contain only the columns we are interested in. Below you can explore the the data we are going to use in this workbook.
+
+```{r, echo=FALSE}
+DT::datatable(Whale)
+```
+
+
+
+## What is an 'Hypothesis' 
+
+What is the proportion of male among humpback whales? Without knowing too much about whales, one may answer 50%, so half of the whales are male and the other half are female. Actually, one out of the 23581 whale was labelled as hermaphrodite, but we can ignore this, an assume that the whales are either male or female.
+Let's have a look at the data. The figure below shows the percentage of male whales for the period 1949-1962, the only period with data for every year and with at least 100 catches per year.
+
+
+```{r, out.width="80%", echo = FALSE}
+img <- readPNG("img/MalePerc.png")
+grid.raster(img)
+```
+
+If there was no difference in the underlying proportions of male and female whales, then each year there would be a 50:50 chance to have more male than female catches, or more female than male catches, just like flipping a coin. But having more male than female every year for fourteen years is like flipping a fair coin 14 times in a row and getting heads every time. The probability of this happening is 0.5^14, which is a small number: 0.0000610, and if we take into account the other four years with more than 100 catches, 1925-28, all of them with proportions of male above 0.5, the probability of this happening, if there is a 50:50 chance to have a male or a female whale would be 0.00000381. If we observed this in a coin-flipping experiment, we could confidently claim that the coin was not fair.
+
+So, we can ask ourselves the question whether the true proportion of males among the humpback wales can really be 50%? The process we follow to answer a question like this is called *Hypothesis Testing*.
+
+We can define a hypothesis as a proposed explanation for a phenomenon. It is not the absolute truth, but a provisional, working assumption. Sometimes it is useful to use the analogy with the suspect in a criminal case.
+
+
+### The Null Hypothesis
+
+The *Null Hypothesis* is the hypothesis, a proposed explanation for a phenomenon, that we are going to work with until we have sufficient evidence against it. In the example of the proportion of male whales, we could state the null hypothesis as:
+
+-   The proportion of male whales is 50%, or
+
+-   the proportion of male whales is equal to the proportion of female whales.
+
+The null hypothesis is what we are willing to assume is the case until proven otherwise. It is extremely conservative, denying any progress or change. However, it doesn't mean that we believe the null hypothesis is literally true, we can never claim that the null hypothesis has been actually proved. In the words of Ronald fisher, the father of modern statistics, "the null hypothesis is never proved or established, but is possibly disproved, in the course of experimentation. Every experiment may be said to exist only in order to give the facts a chance of disproving the null hypothesis." (R.A. Fisher (1935), The Design of Experiments. Oliver and Boyd, p.19).
+
+There is a strong analogy with criminal trials in the English, but not only the English, legal system: a defendant can be found guilty. but nobody is ever found innocent, simply not proven guilty. Similarly, we may find that we reject the null hypothesis, but if don't have enough evidence to do so, it doesn't mean that we can accept it as truth. It is just a working assumption until something better comes along.  
+
+Once we remove the cases with sex different from either "Male" or "Female", the proportions are:
+- Male: 59.75%
+- Female: 40.25%
+and the difference is 19.50%. 
+The crucial question is whether this difference is big enough to provide evidence against the null hypothesis that the difference is = 0. 
+
+Let's try to identify the key concepts in this process:
+
+-   The population is the area in Mars explored by the rover
+
+-   The unit is the the content of Martian rock and regolith in a single tube collected by the rover 
+
+-   The sample contains 18 units 
+
+
+
+## Basic Ideas of Sampling and Estimation
+
+The procedure by which the sample of units is selected from the population is called *Sampling*. Sample units are then observed and some characteristic is measured. The sample will consist of these measurements along with other information that may allow the identification of each unit.
+
+We will, then, use this sample data to estimate some population characteristic. But, while the population characteristic remains fixed, its estimate depends on which sample is selected. There are two desirable characteristics of the estimates than can be controlled when we design the sampling scheme:
+
+-   being unbiased: the estimates are targeting the true (but unknown) population value, possibly the estimate won't have same value as the population value, but will be "around" it, close to it. This is achieved obtaining *representative samples* by selecting the units in the sample randomly (or, at least, with some degree of randomness), using probabilistic sampling methods.
+
+-   The precision of the estimate: how close we expect our estimate to be with respect to the true population value, the closer it is, the more precise the estimate. Precision is controlled with the sample size, the larger the sample size, the greater the precision of the estimate.
+
+The picture below shows the two concepts of precision and bias.
+
+![](https://upload.wikimedia.org/wikipedia/commons/d/d6/LT_accuracy.png){#id .class width=75% height=75%}
+
+Each dot represents an estimate obtained from one sample and the bull's eye the population characteristic of interest.
+
+-   The top row shows biased results, as they are not aiming the target (the bull's eye)
+
+-   The bottom row shows un-biased results, aiming at the right target
+
+-   The column at the left shows results with little precision, scattered around the target, either when biased or not.
+
+-   The column at the right shows results with great precision, concentrated on the target, either when biased or not.
+
+The problem, however, is that we usually don't know the actual value of the population characteristic, and that we have only one sample!
+
+A quick an easy way to look at this is obtaining the mean of samples of the result of rolling a dice. Let's assume the dice is perfectly balanced, if it weren't we would obtain biased estimates. In this case, we know what we expect to obtain:
+
+-   the proportion of 1's, 2's, 3's,... should be approximately the same, and approximately 1/6 or 16,67%
+
+-   the average of the result of rolling N dices will be close to 3.5
+
+
+Once you select below the number of dices, N, you will obtain a new random sample. We can use this sample to estimate the probability to obtain a result (say, a "2") and the population average.
+We will use the new sample mean as the new population mean estimate and the proportion of "2" in the sample as the estimate of the probability of obtaining a "2".
+By generating repeated samples you will observe that they are probably not equal to the expected average (3.5) but a value that sometimes is greater than 3.5 and sometimes smaller than 3.5, with the occasional result equal to 3.5. This highlights the idea of an unbiased estimate, as it is targeting (with some error) the true population value of 3.5, and the idea of precision, as the estimate will rarely be the actual population value, and we can observe how far is from it. 
+
+Now, let's change the sample size, for example n=100 or n=1000. You will observe how the sample mean still varies each time, but deviates less from the true value of 3.5. The same happens with the proportion of "2", the larger the sample size, the closer it is to 16.67%. 
+
+```{r dice_ui, context="render",echo=FALSE}
+
+  sliderInput("n_dice",label = "Number of dice rolls",min = 0,max=1000,value = 10,step = 5)
+  actionButton("go","Roll Dice!")
+  plotOutput("plot_results")
+
+```
+
+```{r dice_server,context="server"}
+
+ dice<-reactiveValues(value=NULL)
+
+  observeEvent(input$go,{
+ dice$value<-data.frame(roll=sample(1:6, size= as.numeric(input$n_dice), replace=TRUE))
+  })
+
+output$plot_results<-renderPlot({
+ if(!is.null(dice$value)){
+ggplot(dice$value,aes(x=roll))+
+    geom_bar()+
+      ggtitle(paste("Mean Value =",round(mean(dice$value$roll),2)))+
+   scale_x_continuous(labels=1:6,breaks=1:6,limits=c(0.5,6.5))+
+    theme(axis.text = element_text(size=16),title=element_text(size=20))
+}
+})
+
+
+```
+
+The beauty of using simulations is that you already know what you should obtain, and therefore you can compare the results of your simulation with the expected result.
+
+What happens if you roll an unfair dice, one that has 2 sixes, and therefore one of the values one to five is no longer in the dice? If the population average result is 3.5 for fair dices, it will be different for this unfair dice. The proportion of sixes with a fair dice will be 1/6=16.67%, this will change now with the unfair dice. Roll it a few times and see what happens. Can you guess which value was removed to introduce the second six? 
+You can also observe how the precision increases as the sample size increases.
+
+```{r dice_ui2, context="render",echo=FALSE}
+
+  sliderInput("n_dice2",label = "Number of dice rolls",min = 0,max=1000,value = 10,step = 5)
+ selectInput("fair",label = "Select Dice Type",choices=c("Fair","Unfair (2 Sixes)"="Unfair"))
+  
+  actionButton("go_x","Roll Dice!")
+  actionButton("reset2","Start over")
+  plotOutput("plot_results2")
+
+```
+
+
+
+```{r dice_server2,context="server"}
+
+ dice2<-reactiveValues(value=data.frame(type=NULL,mean=NULL,n=NULL,sixes=NULL),i=0)
+
+observeEvent(input$reset2,{
+  dice2$value<-data.frame(type=NULL,mean=NULL,n=NULL,sixes=NULL)
+  dice2$i<-0
+})
+
+  observeEvent(input$go_x,{
+   if(input$fair=="Fair"){probs<-rep(1,6)}
+    else{probs<-c(1,1,0,1,1,2)}
+  
+   d1<-data.frame(type=input$fair,roll=sample(1:6, size= as.numeric(input$n_dice2),
+                                    prob= probs, replace=TRUE)) %>%
+     group_by(type) %>%
+      summarise(mean=mean(roll),n=n(),sixes=mean(roll==6))
+    
+ dice2$value<-rbind(dice2$value,d1)
+ dice2$i<-dice2$i+1
+
+ 
+  })
+
+output$plot_results2<-renderPlot({
+  if(dice2$i>0){
+
+  
+p1<-ggplot( dice2$value,aes(x=mean,y=sixes,fill=n,shape=type))+
+annotate(geom="point",x=3.5,y=1/6,col="red",size=10)+
+  annotate(geom="point",x=3.5,y=1/6,col="red",size=30,shape=1)+
+    annotate(geom="point",x=3.5,y=1/6,col="red",size=60,shape=1)+
+    annotate(geom="point",x=3.5,y=1/6,col="red",size=100,shape=1)+
+  geom_point(size=5)+
+  scale_y_continuous(limits=c(0,0.5),labels=scales::percent)+
+  scale_x_continuous(limits=c(2,5))+
+  scale_fill_distiller(palette="BuGn",limits=c(1,1000))+
+  theme_light()+
+  scale_shape_manual(values=c(21,22))+
+    theme(axis.text = element_text(size=16),title=element_text(size=20))+
+  labs(x="Mean",y="% Sixes")
+  }else{
+p1<- ggplot( dice2$value)+
+annotate(geom="point",x=3.5,y=1/6,col="red",size=10)+
+  annotate(geom="point",x=3.5,y=1/6,col="red",size=30,shape=1)+
+    annotate(geom="point",x=3.5,y=1/6,col="red",size=60,shape=1)+
+    annotate(geom="point",x=3.5,y=1/6,col="red",size=100,shape=1)+
+  scale_y_continuous(limits=c(0,0.5),labels=scales::percent)+
+  scale_x_continuous(limits=c(2,5)) +
+    scale_shape_manual(values=c(21,22))+
+  scale_fill_distiller(palette="BuGn",limits=c(1,1000))+
+    theme_light()+
+    theme(axis.text = element_text(size=16),title=element_text(size=20))+
+  labs(x="Mean",y="% Sixes")
+}
+p1
+})
+
+
+```
+
+You may have observed that the expected mean for the unfair dice is 4 or very close to 4. This tells us that the number that was removed from the dice to include the second six was the three.
+
+
+## Sampling and non-sampling errors
+One sample is selected at random but other potential samples could have been selected, which may have produced different results. The difference between a statistic derived from a sample and the (unknown) population value is caused by what are known as the sampling and non-sampling errors. These errors are inevitable and, despite its name, "error", it doesn't mean necessarily that we have done something wrong or made a mistake. 
+
+The sampling error comes from the fact that just a part of the population is included in the sample, and therefore the estimate will (most likely) be different from the population value. The sampling error affects the precision of the estimate. We will always have sampling error, it's inevitable, but we know how to handle it. See below in the Estimation section to understand what this means.
+
+The non-sampling errors come from all other fronts:
+
+-   the sample is not representative, for example in a fish survey some selected sites may not be observed due to rough weather conditions; sites farthest from shore are the most typical to have such weather problems, 
+
+-   not measuring all the sample units, for example a non-response in a survey or an animal or plant that dies.
+
+-   measuring the characteristic with measurement or recording error. For example, in the Humpback dataset, there are 31 whales with length = 0, or misrecording a whale with actual length = 12.79m as 17.29m.
+
+-   when dealing with humans, response bias is a source of non-sampling errors. It happens when a number of different conditions or factors may cue respondents to provide inaccurate or false answers during surveys or interviews. For example, a professor is asking their students whether they have ever cheated on exams in his class, the participants are not likely to respond truthfully; instead their responses are biased toward responses that are expected from them.
+
+
+The non-sampling affect the accuracy of the estimates, and are the cause of bias.
+
+Non-sampling errors are unavoidable, but they can be reduced being careful during design and data collection stages:
+
+-   At planning stage, all potential non-sampling errors are listed and steps taken to minimise them are considered. You should establish a sensible data quality assurance system.
+
+-   Critically view the data collected and attempt to resolve queries immediately they arise.
+
+-   Document sources of non-sampling errors so that results presented can be interpreted meaningfully.
+
+-   If data are collected by others, ensure you understand the data collection process and the quality assurance system that was put in place before you decide to use the data.
+
+Designing a sample using a scientific approach can help to minimise sampling error and create estimates that are precise and unbiased.
+
+## Probabilistic and non-probabilistic sampling
+
+Sampling methods can be categorised into two very broad classes on the basis of how the sample was selected: probabilistic and non-probabilistic sampling. 
+
+In a probabilistic sampling scheme, every element in the population has a known, non-zero probability of being included in the sample. A non-probabilistic sampling plan doesn't have this feature.
+
+In probabilistic sampling, because every element has a known chance of being selected, we can obtain unbiased estimates of the population characteristics of interest, and we can also know their precision. 
+
+Non-probabilistic sampling, on the other hand, does not have this feature, and we don't have a firm method of assessing either the reliability nor the validity of the resulting estimates. 
+
+In the coming sections we are going to describe some of the most popular sampling methods in environmental sciences.
+
+
+### Sampling frame
+
+In probabilistic sampling, the probability of any element appearing in the sample must be known. To accomplish this we need some list of all the population units from which the sample can be selected. This list is called a *Sampling Frame* and should have the property that every element in the population has some chance of being selected in the sample by whatever method is used to select elements from the sampling frame.
+
+Ideally, a sampling frame should be a complete list of all members of the target population. In reality, however, this is rarely the case in the environmental sciences. In some situations it is impossible to devise a sampling frame for the study population. Suppose we are interested in the birds that cross an area (say a valley) during their spring migration; in this case, we won't be able to  finish the list until the seasonal migration is complete. 
+But even when a sampling frame is not available, random sampling can sometimes be applied, for example using systematic sampling. This will be discussed below in the *Sampling strategies in environmental sciences* section.
+
+
+## Basic Sampling: Simple Random Sampling
+
+In the previous sections we have seen what happens when we take several samples from the same population. However, in a research study we usually can get just one sample, so we have to make most of it. 
+
+Simple Random Sampling (SRS) is the probabilistic sampling design in which every unit in the population has exactly the same probability to be selected. It is the most efficient sampling design, as it provides the most precise estimates of the population characteristic for a given sample size, and these estimates are unbiased.
+
+The winning numbers of the lotto, the result of rolling a dice or tossing a coin are examples of simple random sampling, as we know beforehand that all the possible outcomes have exactly the same probability.we can extract a Simple Random Sample of whales from our dataset by allocating the same probability to be selected to each whale. 
+
+Unfortunately, not always it is possible to use this sampling plan We will discuss later, in the *Sampling strategies in environmental sciences* section, other options when SRS is not possible or economically inefficient.
+
+
+
+## Estimation
+
+In a SRS, *the best estimate* for the 
+
+-   *population mean* is the sample mean
+
+-   *population variance* is the sample variance
+
+-   *population proportion (or probability)* is the sample proportion.
+
+The estimate is *best* because it is unbiased and with maximum precision. 
+
+These estimates provide a single value for the population characteristic, they are known as the point estimates. If the SRsampling has been conducted properly we can expect no biases. However, as we saw previously in the sample obtained by rolling a dice several times, they are not (in general) equal to the population value, sometimes they are going to be greater than it, sometimes smaller, and in a very few cases, equal to sample mean.
+
+We, therefore, would like to know how precise our estimate is, how close it is to the population value. So we add to the point estimate a measure of precision of it. There are different ways of computing this degree of precision (or uncertainty):
+
+-   *standard error* (usually used for means or variances)
+
+-   *margin of error* (usually used for proportions)
+
+-   *confidence interval* (used by both: means, variances and proportions).
+
+All of them are related, so if you know one of them you can easily obtain the other two. For example, a possible margin of error is calculated as: Margin of error = 2 × standard error. We will discuss the confidence interval in the next sub-section.
+
+note that we use the term *error* to measure the degree of precision/uncertainty in or estimates.
+
+If we obtain *k* samples of *n* units each from the same population, and compute the mean of each sample, we will have *k* estimates of the population mean (and the same applies for the variance or the proportion, when applicable), as their means will vary from one sample to another. Like the series of observations in each sample, the sample of *k* sample means has a standard deviation. The standard error of the mean of one sample is an estimate of the standard deviation that would be obtained from the means of a large number of samples drawn from that population.
+ 
+One of the interesting characteristics of the three precision/uncertainty measures above is that they depend on the sample size *n*. Specifically, they are a function of *1/sqrt(n)* where *n* is the sample size. Therefore, the larger the sample size, the more reduced will the uncertainty measures of the estimates be. However, the gain in precision is big when we increase a small sample by one unit, but this gain will decrease as the sample size increases. 
+
+The figure below shows how the standard error (SE) of the mean varies with the sample size for the sample of results obtained by rolling a dice *n* times. For very small sample sizes, an increment of the sample size implies a sizable decrease in the SE of the mean, whereas, as the sample size grows, the decrease in the SE of the mean for one extra element in the sample tends to zero.   
+
+
+Since the precision of our estimate depends on the sample size, it can be established at design stage, before we collect the data provided that we have some prior information. We will need an estimate of the population
+
+-   variance/standard deviation to obtain the SE of the mean: SE=std(y)/sqrt(n)
+
+-   proportion to obtain the SE of a proportion SE=sqrt(p(1-p)/n)
+
+from previous data or knowledge.
+
+It is important to realise that we do not have to take repeated samples in order to estimate the standard error, there is sufficient information within a single sample. 
+
+An interesting result of this is that the sample size depends on the precision you would like to achieve (or that the precision of your estimates will depend on the sample size), but it does not depend on the population size, provided that your population is large enough. The sample size is a figure, not a percentage!!
+For small populations, and small here means up to some hundreds, a correction applies, so we won't get sample sizes greater than the population size!
+
+
+### Confidence Interval
+
+*A confidence interval gives an indication of the degree of uncertainty of an estimate and helps to decide how precise a sample estimate is*. It specifies a range of values likely to contain the unknown population value. These values are defined by lower and upper limits, and the probability that the Confidence Interval includes the true population value is given by the confidence level.
+
+The width of the interval depends on the actual precision of the estimate and the confidence level used. A greater standard error will result in a wider interval; and the wider the interval, the less precise the estimate will be.
+
+A 95% confidence level is by far the most commonly used. However, it is possible to calculate the CI at any given level of confidence, such as 90% or 99%. But why 95%? It was set by the father of modern statistics himself, Sir Ronald Fisher. In 1925, Fisher picked 95% because the distance from the center of the Confidence Interval and the upper or lower limit is almost 2 times (1.96 times, to be precise) the standard error of the estimate. This threshold has since persisted for almost a century. It is a good compromise between being almost sure (95%) that it includes the population value, and not being so extremely wide that it wouldn't be useful for estimation purposes.
+
+For a confidence level of 95%, if we drew 20 random samples and calculated a 95% confidence interval for the mean for each sample using the data in that sample, we would expect that, on average, 19 out of the 20 (95%) resulting confidence intervals would contain the true (and unknown) population value and 1 in 20 (5%) would not. So, most of the time, but not always. If we increased the confidence level to 99%, wider intervals would be obtained to increase the probability to include the true value, and only one out of 100 times we will get a confidence interval does not include the true value.
+
+To calculate confidence intervals around an estimate we use the standard error (or the margin of error) for that estimate. The estimate and its 95% confidence interval are presented as: the estimate plus or minus the margin of error.
+The lower and upper 95% confidence limits are given by the sample estimate plus or minus 2 standard errors.
+
+
+For the purposes of this demonstration we are going to use two examples of the Humpback Whale data set.
+The number of Humpback whales in the data set is 23581, large enough to assume that the characteristics of interest  
+in the population of Humpback whales (length and sex) are basically these in the sample.
+
+Let's have a look at the data
+
+```{r, echo = FALSE}
+DT::datatable(Whale)
+```
+
+The two variables we are interested in are the *sex* of the whale and its *length*.
+The table below shows the number and percentage of whales in each sex. 
+
+```{r whale_sex_table,echo=FALSE}
+Whale %>%
+  group_by(sex) %>%
+    summarise("Number"= n(), 
+              "Percentage" = scales::percent(n()/nrow(Whale),0.1)) %>%
+  gt::gt()
+```
+
+There are roughly 60% of Male and 40% of female whales. Does this result show that these are, approximately, the true proportions of each sex? Or does it show that it is easier to catch male than female whales? Or does it show that the whalers were more interested in male than in female whales? We don't know, but for the purpose of this exercise, we will assume that these are the true proportions of male and female whales: 59.7% are male and 40.2% are female.Note also that for 25 whales out of 23581 (0.1%) sex could not be identified, and 1 whale was hermaphrodite!
+
+the table below summarises the length of the whales
+
+```{r sum_table, echo = FALSE}
+
+  gt::gt(table_stat) %>%
+  gt::fmt_number(columns = 2)
+  
+```
+
+Take a look at graphical display of the length in the interactive plot below
+
+```{r v1_ui, context="render",echo=FALSE}
+
+  selectInput("plot_type",label = "Type of Visualisation",
+              choices =choices)
+  plotlyOutput("plot1")
+
+```
+
+
+```{r v1_server,context="server"}
+  output$plot1 <- renderPlotly({
+    
+    if(input$plot_type=="boxplot"){
+      outs1<-quantile(Whale$length.m.,c(0.25,0.75))+c(-1,1)*diff(quantile(Whale$length.m.,c(0.25,0.75)))*1.5
+      outs<-Whale %>%
+        filter(length.m.<outs1[1] | length.m.>outs1[2])
+    } 
+    
+(ggplot(Whale)+
+    {if(input$plot_type=="histogram")geom_histogram(aes(x=length.m.))}+
+    {if(input$plot_type=="boxplot")geom_boxplot(aes(y=length.m.))}+
+      {if(input$plot_type=="density")geom_density(aes(x=length.m.))}+
+    {if((input$plot_type=="density"|input$plot_type=="histogram")) labs(x="Length (m)") }+
+    {if((input$plot_type=="boxplot")) labs(y="Length (m)") }+
+    plot_theme+
+    ggtitle(paste(names(choices)[choices==input$plot_type]," - Length (m)")))  %>% 
+      ggplotly()
+})
+    
+```
+
+
+
+Let's assume that the 23550 whales reported in the dataset are the population of whales in the Australian shores, and let's see what happens if we takes samples from it and observe how the sample mean of the length and the proportion of male/female, the estimate for the population mean and the proportion of male/female, behave as we obtain a new sample. The sampling method used is Simple Random sampling, each unit has exactly the same probability to be selected.
+
+
+```{r sample_ui, context="render",echo=FALSE}
+
+  sliderInput("n_sample",label = "Sample Size",min = 5,max=500,value = 50,step = 5)
+ sliderInput("conf_level",label = "Confidence Level",min = 0.5,max=0.999,value = 0.95,step = 0.001)
+  actionButton("go2","Make New Sample!")
+  selectInput("type",label="Plot Type",choices = c("violin","errorbar"))
+  gt_output("table1")
+    plotOutput("ci_plot")
+
+```
+
+
+```{r, sample_server,context="server"}
+
+ whale_sample<-reactiveValues(sample=NULL)
+
+whale_summary<-Whale %>%
+  summarise("Mean Length"=mean(length.m.),"SD Length"=sd(length.m.),"SE Length"=sd(length.m.)/sqrt(n()),
+            "% Male"=scales::percent(mean(sex=="Male"),0.1)) %>%
+  mutate(Sample="Complete Data")
+
+
+  observeEvent(input$go2,{
+ whale_sample$sample<-slice_sample(Whale,n = as.numeric(input$n_sample),replace=FALSE)
+ whale_sample$label<-as.numeric(input$n_sample)
+  })
+
+output$table1<-render_gt({
+ if(!is.null(whale_sample$sample)){
+
+  (whale_sample$sample %>%
+  summarise("Mean Length"=mean(length.m.),"SD Length"=sd(length.m.),"SE Length"=sd(length.m.)/sqrt(n()),
+            "% Male"=scales::percent(mean(sex=="Male"),0.1)) %>%
+  mutate(Sample=paste0("Random Sample (n=", whale_sample$label,")"))) %>%
+     full_join(whale_summary) %>%
+     gt() %>%
+     fmt_number()
+
+   
+   
+}
+})
+
+
+output$ci_plot<-renderPlot({
+ if(!is.null(whale_sample$sample)){
+
+   if(input$type=="violin"){
+ p1<- whale_sample$sample %>%
+  summarise("Mean"=mean(length.m.),"SD"=sd(length.m.),"SE"=sd(length.m.)/sqrt(n())) %>%
+     ggplot(aes(x=1,y=Mean,ymax=Mean+qnorm(1-((1-as.numeric(input$conf_level))/2))*SE,
+                ymin=Mean-qnorm(1-((1-as.numeric(input$conf_level))/2))*SE))+
+       geom_violin(data=whale_sample$sample,aes(x=1,y=length.m.),inherit.aes=FALSE)+
+         geom_point()+
+     geom_errorbar(width=0.05)+
+     geom_violin(data=Whale,aes(y=length.m.,x=2),inherit.aes=FALSE,col="red")+
+          annotate(geom="point",y=mean(Whale$length.m.),x=2, size=4,col="red")+
+     scale_y_continuous(limits=c(5,20))+
+       scale_x_continuous(breaks=1:2,labels=c("Sample","Data"))+
+          ggtitle(paste0(whale_sample$label," samples\n",scales::percent(input$conf_level,0.1)," Confidence Level"))+
+    theme(axis.text = element_text(size=16),title=element_text(size=20))
+   }
+     if(input$type=="errorbar"){
+   whale_sample$sample %>%
+  summarise("Mean"=mean(length.m.),"SD"=sd(length.m.),"SE"=sd(length.m.)/sqrt(n())) ->plt_dt
+       
+       p1<-  ggplot(plt_dt,aes(x=1,y=Mean,ymax=Mean+qnorm(1-((1-as.numeric(input$conf_level))/2))*SE,
+                ymin=Mean-qnorm(1-((1-as.numeric(input$conf_level))/2))*SE))+
+         geom_point()+
+     geom_errorbar(width=0.05)+
+     scale_y_continuous(limits=c(min(c(plt_dt$Mean-qnorm(1-((1-as.numeric(input$conf_level))/2))*plt_dt$SE,10)),
+                                 max(c(plt_dt$Mean+qnorm(1-((1-as.numeric(input$conf_level))/2))*plt_dt$SE,17))))+
+          annotate(geom="point",y=mean(Whale$length.m.),x=2, size=4,col="red")+
+          scale_x_continuous(breaks=1:2,labels=c("Sample","Data"))+
+          ggtitle(paste0(whale_sample$label," samples\n",scales::percent(input$conf_level,0.1)," Confidence Level"))+
+    theme(axis.text = element_text(size=16),title=element_text(size=20))
+     }
+   p1
+ }
+})
+
+```
+
+You can also change the sample size. By increasing it, the sample estimates will be closer and closer to the actual population value. The 95% confidence interval changes the centre (because it is the sample mean), but the width change is very small.
+
+You can also change the confidence level. If you increase it from 95% to, say, 99%, you will observe how the confidence interval gets wider, and if you set the confidence level at 90%, the confidence interval will get narrower.
+
+*[SAM, THE ci DOESN'T CHANGE MUCH, NOT SURE IT DOES, BUT IF IT DOES IT IS REALLY DIFFICULT TO SEE THE CHANGE]*
+*[MAYBE WE COULD ADD THIS POSSIBILITY, BEEN ABLE TO CHANGE THE CONFIDENCE LEVEL IN THE NEXT INTERACTIVE PLOT, WHERE THE CHANGES I'M SURE WILL BE EASY TO SPOT]*
+
+
+Now, let's observe what happens with the 95% Confidence intervals. You can generate, by a Simple Random Sampling process, samples of size *n* from the population of whales. For each sample, the 95% Confidence interval will be generate and, until you reset, the confidence intervals are accumulated in the plot.
+
+
+```{r sample_ui2, context="render",echo=FALSE}
+
+  sliderInput("n_sample2",label = "Sample Size",min = 5,max=500,value = 50,step = 5)
+ sliderInput("conf_level2",label = "Confidence Level",min = 0.5,max=0.999,value = 0.95,step = 0.001)
+  actionButton("add","Add New Sample!")
+    actionButton("reset","Reset")
+ 
+    plotOutput("cumulative_ci_plot")
+
+```
+
+
+```{r, sample_server2,context="server"}
+
+ whale_sample2<-reactiveValues(sample=list())
+
+observeEvent(input$reset,{
+  whale_sample2$sample<-list()
+})
+
+whale_summary2<-Whale %>%
+  summarise("Mean"=mean(length.m.))
+
+
+  observeEvent(input$add,{
+ whale_sample2$sample<-append(whale_sample2$sample,
+                             list(sample(1:nrow(Whale),size =  as.numeric(input$n_sample2),replace=FALSE)))
+  })
+
+output$cumulative_ci_plot<-renderPlot({
+  
+  p1<-ggplot(whale_summary2)+
+    geom_hline(aes(yintercept=Mean),col="blue")
+  
+ if(length(whale_sample2$sample)>0){
+
+   
+   whale_sample2$sample %>%
+     map_df(function(x)slice(Whale,x) %>% summarise(mean=mean(length.m.),n=n(),se=sd(length.m.)/sqrt(n()))) %>%
+     mutate(sample=1:n())%>%
+     mutate(colour=!(((mean + qnorm(1-((1-as.numeric(input$conf_level2))/2))*se)<whale_summary2$Mean) |
+                       ((mean - qnorm(1-((1-as.numeric(input$conf_level2))/2))*se)>whale_summary2$Mean)) )->samples
+     
+   p1<-p1+
+     geom_point(data=samples,
+                   aes(y=mean,x=sample,colour=colour))+
+     geom_errorbar(data=samples,
+                   aes(y=mean,x=sample,ymax=mean+qnorm(1-((1-as.numeric(input$conf_level2))/2))*se,
+                       ymin=mean-qnorm(1-((1-as.numeric(input$conf_level2))/2))*se,colour=colour),inherit.aes = FALSE)+
+     scale_y_continuous(limits=c(min(samples$mean)-3.5*max(samples$se),
+                                 max(samples$mean)+3.5*max(samples$se)))+
+     scale_color_manual(values=c("FALSE"="red","TRUE"="black"))+
+     ggtitle("95% Confidence Intervals")+
+     theme_light()+
+     labs(colour="Includes true value?")
+   
+ }
+  print(p1)
+   
+ 
+})
+
+```
+
+As the sample size grows, again, the 95% confidence interval will get narrower. For example, if you generate a sample of size n=50 and generate the 95% Confidence interval and then generate a new sample of size n=4*50=200, the width of the new sample 95% Confidence interval will be a half of the first one, as the with of the Confidence interval is proportional to 1/sqrt(n).
+
+95% of the 95% Confidence intervals, or 19 out of 20, should include the population mean, that is represented by the horizontal line in the plot. If you keep generating samples and their corresponding 95% CI long enough, you will find that one Confidence Interval does not include the population mean. to identify it easily it is red instead of the usual black. This is a probabilistic statement, so it may happen in your first sample or may not happen until you have generated 30 samples, but in the long run, the proportion of 95% confidence intervals that do not include the population mean will be around 5% or one out of 20. And this will happen no matter how large is your sample size. Sample size affects the precision of the estimate, the width of the 95% confidence interval, but, by its definition, the 95% Confidence interval will contain the true population value for 95% of the random samples.
+
+Let's suppose we selected a sample of n=400, the mean of the length was 13.25m, and the 95% Confidence interval [13.106;13.394]. The true average length value, that will usually be unknown, is 13.30m, which is included in the confidence interval. however there are lots of other values, infinite to be precise, that are included in the confidence interval. According to our sample and the confidence interval  we obtained from it, the mean population length of the Humpback whales could be 13.11m, or 13.21m, or 13.31m or any other value within the interval limits. And there is still a small chance, 5%, that the true population mean length is outside the limits, either way. 
+What if we generated the 99% confidence interval instead from the same sample? the 99% CI is [13.061;13.439]. Now, there is just 1% probability that the true value lies beyond the CI limits, but this has a cost, the 99% CI is wider than the 95% CI. 
+
+The confidence interval and the confidence levels are both related to the *p-value* that we are going to present in Workbook 3.
+
+## Sampling strategies in environmental sciences
+
+In this section, we are going to explore some of the common sampling methods in environmental sciences.
+
+*Stratified Sampling:* is a probability sampling method that involves the division of a population into smaller homogeneous subgroups known as strata prior to sampling. In stratified random sampling, or stratification, the strata are formed based on strata shared attributes or characteristics such as soil characteristics, slope, age or sex of individuals. simple random samples are then taken within each stratum. It is also called proportional random sampling or quota random sampling.
+Strata should be defined carefully, based on the response of the attribute you are estimating to habitat characteristics that are unlikely to change over the time of the study
+• If there is no obvious reason for the difference in your area under investigation, you’re probably better off using a simple random sampling procedure
+• Sampling units do not have to be allocated in equal numbers to each stratum. Some options on how to allocate sub-sample sizes to each stratum are:
+
+-   equally to each stratum;
+
+-   In proportion to the size of each stratum;
+
+-   In proportion to the number of target individuals in each stratum;
+
+-   in proportion to the amount of variability in each stratum,
+
+and the sampling method used to obtain the subsamples within each stratum can be any that is considered suitable.
+
+An example of how we could do the sampling in a fish survey: in location A there is good conditions and a high density of fish; location B, however, has less favorable conditions so much fewer fish. Since we would like to have enough fishes from each site, we may choose to stratify to over-sample from location B to be able to understand this environmental gradient more.
+
+
+The method is useful when the attribute of interest responds very differently to some clearly defined habitat structure or when we want to make sure that some areas/characteristics such as sex or age are included in the sample. The recommendations within strata are the same of simple random sampling
+
+Pros of stratified sampling: 
+
+-   it provides a systematic way of gaining a population sample that takes into account the demographic make-up of the population, which leads to stronger research results.
+
+-   The method is fair for population units as the sample from each stratum can be randomly selected, meaning there is no bias in the process.
+
+-   As participant grouping must be exhaustive and mutually exclusive, stratified random sampling removes variation and the chances of overlap between each stratum.
+
+-   Lastly, it helps with efficient and accurate data collection. Having a smaller, more relevant sample to work with means a more manageable and affordable research project.
+
+And the Cons:
+
+-   Researchers may hold prior knowledge of the population’s shared characteristics beforehand, which increases the risk for selection bias when strata are defined.
+
+-   There is more administration to do to conduct this process, so researchers must include this extra time and order.
+- When randomly sampling each stratum, the resulting sample may not be representative of the full population. This will be addressed by the use of sampling weights during the analysis, a further complication.
+
+-   Once you have the final sample, data analysis of the information becomes more complicated to take into account the layers of the stratum.
+
+-   for the same sample size, stratified designs yield estimates with lower precision than SRS.
+
+The analysis of data sampled using stratified sampling requires to apply weights when estimating something across the whole population. Getting back to the fish survey, if we select equal subsamples in the two site, the probability to select a fish from oversampled site B will be higher than the probility to select a fish from undersampled site A.  
+
+
+*Cluster sampling* is a probabilistic sampling technique. It involves dividing a population into clusters or groups, selecting a sample of clusters, and then sampling individuals or units within those clusters. The primary purpose of cluster sampling is to simplify the sampling process while still ensuring a representative sample of the population. 
+
+Clusters are formed based on specific characteristics relevant to the research study, such as geographical location, administrative boundaries, or organizational structure. Clusters should be randomly selected from the population to ensure unbiased representation. Randomization helps minimize selection bias and ensures that every cluster has an equal chance of being included in the sample. Clusters should ideally be internally homogeneous, meaning that individuals or units within the same cluster are similar or alike in relevant characteristics. This helps improve the sampling efficiency and enhances the representativeness of the sample. Clusters should be independent of each other to avoid duplication of sampling and ensure that each cluster contributes unique information to the sample. Overlapping or dependent clusters can lead to biased estimates and undermine the validity of the findings.
+
+The sampled clusters become the *Primary Sampling Units (PSU)* from which the individuals or units will be selected, becoming the *Secondary Sampling Units (SSU), using any of the methods described. 
+
+Cluster Sampling Advantages:
+- Efficiency: Cluster sampling is often more efficient than other sampling methods, especially when the population is large or geographically dispersed.
+- Cost-Effectiveness: By sampling entire clusters instead of individual units, you can reduce costs associated with recruitment, data collection, and analysis.
+- Logistical Feasibility: Cluster sampling simplifies the sampling process, making it easier to manage and execute, particularly in field-based or community-based research.
+
+Cluster Sampling Disadvantages
+- Increased Variability: Due to the clustering of individuals within clusters, there is a risk of increased variability in the sample estimates compared to simple random sampling. For a given sample size it yiels estimates that are less precise that those obtained through Simple Random Sampling.
+- Complex Analysis: Analyzing cluster sampling data requires specialized statistical techniques to account for the clustered nature of the sample, which can be more complicated than analyzing data from simple random samples.
+
+
+*Systematic sampling* is a probability sampling method in which researchers select members of the population at a regular interval (or k) determined in advance.If the population order is random or random-like, then this method will give you a representative sample that can be used to draw conclusions about the population.
+
+The pros of systematic sampling are that its easy to use, While it retains an element of randomness, it also introduces some control and process into the selection process, it's low risk and it's resistant to bias, as After the initial starting point is selected, researchers have little control over who/what gets selected for systematic sampling.
+The cons are related to the fact that Systematic sampling can remove some of the unpredictability from a sample, meaning that a researcher could potentially manipulate the results by choosing a starting point that favours their preferred outcome.
+
+*
+We still wish to sample a fraction of 1 in , so if the population size N is unknown, it must be estimated. In this case, the initial study unit is randomly selected from the first k units that become available, for some k. After this, each kth consecutive unit is chosen. For example, we might sample the 3rd person entering a health care clinic on a certain day, and every 10th person thereafter. The sampling frame is compiled as the study progresses.
+*
+*Transect sampling* is a method used to study the distribution and abundance of organisms along a line or pathway. The transect is simply a line that spans the gradient of interest, and then you locate your sample plots along this line (see Figure XXX). The length of your transect would be determined by the gradient you are sampling. For example, research has shown that the “edge effects” of a forest can be seen up to 100 meters into the forest, so to examine this gradient you would want to use a transect at least 100 meters long.
+Locating sample plots along the transect either in a uniform manner (i.e. every 10 meters) or by “randomly stratifying” the sample plots. Random stratification adds the element of randomness to your sample plot select even when using a transect. To randomly stratify your sample plots, divide the transect into logical subdivisions given the length of your transect (i.e. every 50 meters for a 500 meter transect or every 10-20 meters for a 100 meter transect) and the pattern you are trying to examine (i.e. if you expect rapid change then perhaps more subdivisions, if you expect slow graduate change, then perhaps fewer subdivisions). Then randomly allocate the sample plots within each subdivision of the transect (see Figure ).
+
+
+*Quadrat sampling* is a classic tool for the study of ecology, especially biodiversity. It is an important method by which organisms in a certain proportion (sample) of the habitat are counted directly. It is used to estimate population abundance (number), density, frequency and distributions. The quadrat method has been widely used in plant studies. A quadrat is a four-sided figure which delimits the boundaries of a sample plot. The term quadrat is used more widely to include circular plots and other shapes.
+
+The quadrat sampling method has the following assumptions:
+- The number of individuals in each quadrat is counted.
+- The size of the quadrats is known.
+- The quadrat samples are representative of the study area as a whole.
+
+
+The pros of quadrat sampling are:
+- It sampling is easy to use, inexpensive.
+- It is suitable for studying plants, slow-moving animals and faster-moving animals with a small range.
+- It requires the researcher to perform the work in the field and, without care.
+- It measures abundance and needed cheap equipment.
+
+Some cons are:
+- Quadrat sampling is not useful for studying very fast-moving animals which are not stay within the quadrat boundaries.
+- There exists biasness in favor of slow moving taxa.
+- Collect only taxa that are present in the sampling time and not buried too deeper in sediment.
+- It is a low estimate of taxonomic richness and assemblage composition.
+- It is also a low detectability of among-site differences in assemblage composition.
+- Some animals may experience harm if the scientist collects the population within the quadrat rather than studying it in the field.
+
+A nice summary of sampling approaches can be found in the figure below
+
+*Purposive sampling* is a non-probabilistic sampling process in which a researcher selects a specific group of individuals or units for analysis because they have characteristics that are needed in the sample. This method is appropriate when the researcher has a clear idea of the characteristics or attributes they are interested in studying and wants to select a sample representative of those characteristics. So, units are not selected by a random process, but "on purpose". 
+
+It is also known as *judgemental sampling*, and this method relies on the researcher’s judgement when identifying and selecting the individuals, cases, or sites that can provide the best information to achieve the study’s objectives.
+
+Purposive sampling is best used when you want to focus in depth on relatively small samples. Perhaps you would like to access a particular subset of the population that shares certain characteristics, or you are researching issues likely to have unique cases. It is particularly useful if you need to find information-rich cases or make the most out of limited resources.
+
+
+
+
+## External Links and Resources
+
+Webster, R. and Lark, M. (2013) Field Sampling for Environmental Science and Management
+(This book provides guidance on the design and analysis of sampling method, backed by sound rationale and statistical theory. It concentrates on design-based sampling for estimates of mean values of environmental properties, emphasizing replication and randomization.) 
+
+[Populations and samples](https://www.bmj.com/about-bmj/resources-readers/publications/statistics-square-one/3-populations-and-samples)
+
+[Confidence Intervals](https://www.bmj.com/about-bmj/resources-readers/publications/statistics-square-one/4-statements-probability-and-confiden)
+
+[Sampling and Estimation](https://www.youtube.com/watch?v=kEUN7_b-ja8)
