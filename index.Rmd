@@ -106,7 +106,7 @@ So, we can ask ourselves the question whether the true proportion of males among
 We can define a hypothesis as a proposed explanation for a phenomenon. It is not the absolute truth, but a provisional, working assumption. Sometimes it is useful to use the analogy with the suspect in a criminal case.
 
 
-### The Null Hypothesis
+## The Null Hypothesis
 
 The *Null Hypothesis* is the hypothesis, a proposed explanation for a phenomenon, that we are going to work with until we have sufficient evidence against it. In the example of the proportion of male whales, we could state the null hypothesis as:
 
@@ -118,19 +118,38 @@ The null hypothesis is what we are willing to assume is the case until proven ot
 
 There is a strong analogy with criminal trials in the English, but not only the English, legal system: a defendant can be found guilty. but nobody is ever found innocent, simply not proven guilty. Similarly, we may find that we reject the null hypothesis, but if don't have enough evidence to do so, it doesn't mean that we can accept it as truth. It is just a working assumption until something better comes along.  
 
-Once we remove the cases with sex different from either "Male" or "Female", the proportions are:
-- Male: 59.75%
-- Female: 40.25%
-and the difference is 19.50%. 
+
+## The p-value
+
+Let's suppose we obtain a sample on n=200 units from the population of whales and obtains the following proportions:
+- Male: 60.5%
+- Female: 39.5%
+and the difference is 21.00%. 
 The crucial question is whether this difference is big enough to provide evidence against the null hypothesis that the difference is = 0. 
 
-Let's try to identify the key concepts in this process:
+50% is the probability of obtaining heads when tossing a coin. We can then toss the coin 200 times and observe the proportion of heads in the sample. An we could repeat the process many times, say 10000 times, and see what distribution of proportions of males we obtain. The result we obtained is the one shown in the figure below
 
--   The population is the area in Mars explored by the rover
+```{r, out.width="80%", echo = FALSE}
+img <- readPNG("img/PermTest.png")
+grid.raster(img)
+```
 
--   The unit is the the content of Martian rock and regolith in a single tube collected by the rover 
+The figure shows that, out of 10000 simulations of observing how many successes we got in 200 tries, if the probability of success was 0.5, in only 15 cases we obtained 121 (200*60.5=121) or more successes. So, is it possible that, being the true probability of male/female whales equal 0.5, we observed 121 males in a random sample of 200 whales? The answer is YES, it is possible although very unlikely, as we obtained 121 or more in just 15 out of 10000, a proportion of 0.15%
 
--   The sample contains 18 units 
+Instead of running a simulation of 10000 runs, we could have systematically worked through all the possible permutations of the whale sample. Each of these would generate an observed proportion of male whales, and plotting these would produce a smoother distribution than just for 10000 simulations. Unfortunately, the number of permutations is too high, that cannot be obtained with the current means in the lifetime of a person. Fortunately, though, we don't have to perform these calculations since the probabilty distribution for the proportions under the null hypothesis it is based in what is known as the binomial distribution, which gives the probability of a number of successes out of *n* trials for a given probability of success, 0.5 in our case. The figure below shows the probability density function (*A*) an the cumulative probability distribution function (*B*). In both cases, the value 121 is highlighted with a vertical line, to show how likely is to obtain 121 successes or more in 200 trials where the probability of success is 0.5. This probability is 0.11397%.
+     
+
+```{r, out.width="80%", echo = FALSE}
+img <- readPNG("img/distr and cumul disrt ft.png")
+grid.raster(img)
+```
+
+this probability is the so-called *p-value*, one of the most prominent concepts in statistics as practised today. A more formal definition of p-value is *a p-value is the probability of getting a result at least as extreme as we did if the null hypothesis were really true*.
+
+
+## One-tailed or two-tailed
+
+
 
 
 
