@@ -94,7 +94,7 @@ What is the proportion of male among humpback whales? Without knowing too much a
 Let's have a look at the data. The figure below shows the percentage of male whales for the period 1949-1962, the only period with data for every year and with at least 100 catches per year.
 
 
-```{r, out.width="80%", echo = FALSE}
+```{r fig1, out.width="80%", echo = FALSE}
 img <- readPNG("img/MalePerc.png")
 grid.raster(img)
 ```
@@ -129,7 +129,7 @@ The crucial question is whether this difference is big enough to provide evidenc
 
 50% is the probability of obtaining heads when tossing a coin. We can then toss the coin 200 times and observe the proportion of heads in the sample. An we could repeat the process many times, say 10000 times, and see what distribution of proportions of males we obtain. The result we obtained is the one shown in the figure below
 
-```{r, out.width="80%", echo = FALSE}
+```{r fig2, out.width="80%", echo = FALSE}
 img <- readPNG("img/PermTest.png")
 grid.raster(img)
 ```
@@ -139,7 +139,7 @@ The figure shows that, out of 10000 simulations of observing how many successes 
 Instead of running a simulation of 10000 runs, we could have systematically worked through all the possible permutations of the whale sample. Each of these would generate an observed proportion of male whales, and plotting these would produce a smoother distribution than just for 10000 simulations. Unfortunately, the number of permutations is too high, that cannot be obtained with the current means in the lifetime of a person. Fortunately, though, we don't have to perform these calculations since the probabilty distribution for the proportions under the null hypothesis it is based in what is known as the binomial distribution, which gives the probability of a number of successes out of *n* trials for a given probability of success, 0.5 in our case. The figure below shows the probability density function (*A*) an the cumulative probability distribution function (*B*). In both cases, the value 121 is highlighted with a vertical line, to show how likely is to obtain 121 successes or more in 200 trials where the probability of success is 0.5. This probability is 0.11397%.
      
 
-```{r, out.width="80%", echo = FALSE}
+```{r fig3, out.width="80%", echo = FALSE}
 img <- readPNG("img/distr and cumul disrt ft.png")
 grid.raster(img)
 ```
@@ -147,160 +147,40 @@ grid.raster(img)
 this probability is the so-called *p-value*, one of the most prominent concepts in statistics as practised today. A more formal definition of p-value is *a p-value is the probability of getting a result at least as extreme as we did if the null hypothesis were really true*.
 
 
-## One-tailed or two-tailed
+## One-sided or two-sided test
 
+As we have seen in the previous section, the p-value is the probability of getting a result at least as extreme as we did if the null hypothesis were really true. What do we mean by *extreme*? The p-value we obtained, 0.11% is *one-tailed* because it only measures how likely is that we have observed such an extreme value (60.5%) in favour of males if the null hypothesis was really true. this p-value corresponds to what we know as *one-sided test*. But if we had observed the same proportion of females, would have made us suspect that the null hypothesis does not hold. Therefore, we should also calculate the probability of observing 60.5% of either male or female. This is what is known as the *two-tailed* p-value that corresponds to the *two-sided test*. The two-tail probability is twice the one-sided probability, 0.23% or 0.0023.
 
+   
 
-
-
-## Basic Ideas of Sampling and Estimation
-
-The procedure by which the sample of units is selected from the population is called *Sampling*. Sample units are then observed and some characteristic is measured. The sample will consist of these measurements along with other information that may allow the identification of each unit.
-
-We will, then, use this sample data to estimate some population characteristic. But, while the population characteristic remains fixed, its estimate depends on which sample is selected. There are two desirable characteristics of the estimates than can be controlled when we design the sampling scheme:
-
--   being unbiased: the estimates are targeting the true (but unknown) population value, possibly the estimate won't have same value as the population value, but will be "around" it, close to it. This is achieved obtaining *representative samples* by selecting the units in the sample randomly (or, at least, with some degree of randomness), using probabilistic sampling methods.
-
--   The precision of the estimate: how close we expect our estimate to be with respect to the true population value, the closer it is, the more precise the estimate. Precision is controlled with the sample size, the larger the sample size, the greater the precision of the estimate.
-
-The picture below shows the two concepts of precision and bias.
-
-![](https://upload.wikimedia.org/wikipedia/commons/d/d6/LT_accuracy.png){#id .class width=75% height=75%}
-
-Each dot represents an estimate obtained from one sample and the bull's eye the population characteristic of interest.
-
--   The top row shows biased results, as they are not aiming the target (the bull's eye)
-
--   The bottom row shows un-biased results, aiming at the right target
-
--   The column at the left shows results with little precision, scattered around the target, either when biased or not.
-
--   The column at the right shows results with great precision, concentrated on the target, either when biased or not.
-
-The problem, however, is that we usually don't know the actual value of the population characteristic, and that we have only one sample!
-
-A quick an easy way to look at this is obtaining the mean of samples of the result of rolling a dice. Let's assume the dice is perfectly balanced, if it weren't we would obtain biased estimates. In this case, we know what we expect to obtain:
-
--   the proportion of 1's, 2's, 3's,... should be approximately the same, and approximately 1/6 or 16,67%
-
--   the average of the result of rolling N dices will be close to 3.5
-
-
-Once you select below the number of dices, N, you will obtain a new random sample. We can use this sample to estimate the probability to obtain a result (say, a "2") and the population average.
-We will use the new sample mean as the new population mean estimate and the proportion of "2" in the sample as the estimate of the probability of obtaining a "2".
-By generating repeated samples you will observe that they are probably not equal to the expected average (3.5) but a value that sometimes is greater than 3.5 and sometimes smaller than 3.5, with the occasional result equal to 3.5. This highlights the idea of an unbiased estimate, as it is targeting (with some error) the true population value of 3.5, and the idea of precision, as the estimate will rarely be the actual population value, and we can observe how far is from it. 
-
-Now, let's change the sample size, for example n=100 or n=1000. You will observe how the sample mean still varies each time, but deviates less from the true value of 3.5. The same happens with the proportion of "2", the larger the sample size, the closer it is to 16.67%. 
-
-```{r dice_ui, context="render",echo=FALSE}
-
-  sliderInput("n_dice",label = "Number of dice rolls",min = 0,max=1000,value = 10,step = 5)
-  actionButton("go","Roll Dice!")
-  plotOutput("plot_results")
-
-```
-
-```{r dice_server,context="server"}
-
- dice<-reactiveValues(value=NULL)
-
-  observeEvent(input$go,{
- dice$value<-data.frame(roll=sample(1:6, size= as.numeric(input$n_dice), replace=TRUE))
-  })
-
-output$plot_results<-renderPlot({
- if(!is.null(dice$value)){
-ggplot(dice$value,aes(x=roll))+
-    geom_bar()+
-      ggtitle(paste("Mean Value =",round(mean(dice$value$roll),2)))+
-   scale_x_continuous(labels=1:6,breaks=1:6,limits=c(0.5,6.5))+
-    theme(axis.text = element_text(size=16),title=element_text(size=20))
-}
-})
-
-
-```
-
-The beauty of using simulations is that you already know what you should obtain, and therefore you can compare the results of your simulation with the expected result.
-
-What happens if you roll an unfair dice, one that has 2 sixes, and therefore one of the values one to five is no longer in the dice? If the population average result is 3.5 for fair dices, it will be different for this unfair dice. The proportion of sixes with a fair dice will be 1/6=16.67%, this will change now with the unfair dice. Roll it a few times and see what happens. Can you guess which value was removed to introduce the second six? 
-You can also observe how the precision increases as the sample size increases.
-
-```{r dice_ui2, context="render",echo=FALSE}
-
-  sliderInput("n_dice2",label = "Number of dice rolls",min = 0,max=1000,value = 10,step = 5)
- selectInput("fair",label = "Select Dice Type",choices=c("Fair","Unfair (2 Sixes)"="Unfair"))
-  
-  actionButton("go_x","Roll Dice!")
-  actionButton("reset2","Start over")
-  plotOutput("plot_results2")
-
+```{r, out.width="80%", echo = FALSE}
+img <- readPNG("img/2-sided.png")
+grid.raster(img)
 ```
 
 
+## Statistical significance
 
-```{r dice_server2,context="server"}
+In our example of the proportion of male/female whales, we had the following:
 
- dice2<-reactiveValues(value=data.frame(type=NULL,mean=NULL,n=NULL,sixes=NULL),i=0)
+-   *Null hypothesis*: the proportion of male whales is 50%
 
-observeEvent(input$reset2,{
-  dice2$value<-data.frame(type=NULL,mean=NULL,n=NULL,sixes=NULL)
-  dice2$i<-0
-})
+-   We obtained the simple random sample of *n=200* whales
 
-  observeEvent(input$go_x,{
-   if(input$fair=="Fair"){probs<-rep(1,6)}
-    else{probs<-c(1,1,0,1,1,2)}
-  
-   d1<-data.frame(type=input$fair,roll=sample(1:6, size= as.numeric(input$n_dice2),
-                                    prob= probs, replace=TRUE)) %>%
-     group_by(type) %>%
-      summarise(mean=mean(roll),n=n(),sixes=mean(roll==6))
-    
- dice2$value<-rbind(dice2$value,d1)
- dice2$i<-dice2$i+1
+-   We observed the sex and *measured the proportion of male whales in the sample: 60.5%*
 
- 
-  })
+-   We obtained the *p-value = 0.0023*: the the probability of obtaining a value as extreme of this if the null hypothesis. This is the *two-sided test*.
 
-output$plot_results2<-renderPlot({
-  if(dice2$i>0){
-
-  
-p1<-ggplot( dice2$value,aes(x=mean,y=sixes,fill=n,shape=type))+
-annotate(geom="point",x=3.5,y=1/6,col="red",size=10)+
-  annotate(geom="point",x=3.5,y=1/6,col="red",size=30,shape=1)+
-    annotate(geom="point",x=3.5,y=1/6,col="red",size=60,shape=1)+
-    annotate(geom="point",x=3.5,y=1/6,col="red",size=100,shape=1)+
-  geom_point(size=5)+
-  scale_y_continuous(limits=c(0,0.5),labels=scales::percent)+
-  scale_x_continuous(limits=c(2,5))+
-  scale_fill_distiller(palette="BuGn",limits=c(1,1000))+
-  theme_light()+
-  scale_shape_manual(values=c(21,22))+
-    theme(axis.text = element_text(size=16),title=element_text(size=20))+
-  labs(x="Mean",y="% Sixes")
-  }else{
-p1<- ggplot( dice2$value)+
-annotate(geom="point",x=3.5,y=1/6,col="red",size=10)+
-  annotate(geom="point",x=3.5,y=1/6,col="red",size=30,shape=1)+
-    annotate(geom="point",x=3.5,y=1/6,col="red",size=60,shape=1)+
-    annotate(geom="point",x=3.5,y=1/6,col="red",size=100,shape=1)+
-  scale_y_continuous(limits=c(0,0.5),labels=scales::percent)+
-  scale_x_continuous(limits=c(2,5)) +
-    scale_shape_manual(values=c(21,22))+
-  scale_fill_distiller(palette="BuGn",limits=c(1,1000))+
-    theme_light()+
-    theme(axis.text = element_text(size=16),title=element_text(size=20))+
-  labs(x="Mean",y="% Sixes")
-}
-p1
-})
+Even if there is a very small chance that we had obtained this percentage of male female if the null hypothesis was really true, the p-value is small enough for us to say that the results are *statistically significant*. 
 
 
-```
+## p-value vs. Confidence Interval
 
-You may have observed that the expected mean for the unfair dice is 4 or very close to 4. This tells us that the number that was removed from the dice to include the second six was the three.
+
+## Some statistical tests
+
+
+
 
 
 ## Sampling and non-sampling errors

@@ -110,6 +110,16 @@ plot_grid(pl2, pl3, labels = c('A', 'B'), label_size = 12)
 
 100-distr.ft$cumbinomial.df[distr.ft$tots==121]/2
 
+## two-sided
+
+pl4 <- ggplot(distr.ft, aes(x=tots, y=binomial.df/2))+
+  geom_col()+
+  coord_cartesian(xlim = c(70,130))+
+  labs(x="Num. of Males",y="% Perc")+
+  geom_vline(xintercept = c(79,121), linetype=2,colour = "red")
+
+pl4
+
 ###
 
 tots<- seq(1:200)
