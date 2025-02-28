@@ -171,15 +171,49 @@ In our example of the proportion of male/female whales, we had the following:
 
 -   We obtained the *p-value = 0.0023*: the the probability of obtaining a value as extreme of this if the null hypothesis. This is the *two-sided test*.
 
-Even if there is a very small chance that we had obtained this percentage of male female if the null hypothesis was really true, the p-value is small enough for us to say that the results are *statistically significant*. 
+Even if there is a very small chance that we had obtained this percentage of male female if the null hypothesis was really true, the p-value is small enough for us to say that the results are *statistically significant*, or the difference between the population value (the proportion of male in our example) and the null hypothesis is *significantly different from zero*. The differences between the proportion of males observed in the sample and the null hypothesis value cannot be due to random variation, it happened because the population value *is not equal to the null hypothesis*, and the sample data provides the evidence for this. 
+
+Since we have incomplete information about the population, we only have the sample, we can always be wrong making statements like the one above: "the proportion of male whales is significantly different from 0.5". However, we control the risk of being wrong when rejecting the null hypothesis: the p-value. using the analogy with criminal trials in the English legal system, the sample data provide the evidence against the innocence of the defendant, and p-value is the probability of being wrong if the defendant is declared guilty.
+
+We need to define a *significance level*, denoted by α, the critical threshold value for the p-value so, 
+
+-   if the p-value <= α, the result is statistically significant, and we reject the null hypothesis
+
+-   if the p-value > α, the result is not statistically significant, and we cannot reject the null hypothesis
+
+The most commonly used significance level (α) is 0.05 or 5%, but in some cases a level of 0.1 (10%) or 0.01 (1%) may be used. Therefore, our result may be significant at α=0.05 but not at α=0.01, or can be significant at both levels or at neither level. 
+
+However, we must acknowledge that this threshold is arbitrary. For example, if we use α = 0.05, a p-value of 0.0499 is basically not different from a p-value = 0.0501, but we would make a completely different decision if we stick to the significance level rule. Values well above or well below α lead us to a straightforward decision, values close to α usually lead to an inconclusive decision.
 
 
-## p-value vs. Confidence Interval
+
+## Hypothesis testing
+
+We will use the hypothesis testing for a large number of tests (see below the section on *Statistical tests*), each of which answers a different question. But all of them follow the same steps: 
+
+1-  Set up a question in terms of a null hypothesis that we want to check. We usually use the notation $H_0$ for the null hypothesis. 
+
+2-  Choose a test statistic that estimates something that, if it turns out to be extreme enough, would lead us to doubt the null hypothesis. You will not actually have to find this statistic, as each (standard) statistical test has already defined this test statistic. And you will not have to compute it either, as your statistical software will do this for you. 
+
+3-  Generate the sampling distribution of this tests statistic. if the null hypothesis was true. Again, your statistical software will do this for you.
+
+4-  Obtain the p-value comparing your tests statistic with the sampling distribution. The p-value is the probability of observing such an extreme statistic if the null hypothesis is true. We have to decide if we are going to use the one-sided or two-sided p-value. In most of the tests, we will use the two-sided p-value. Again, your statistical software will do this for you, and by default, it will obtain the two-sided p-value.
+
+5-  Declare if the result is significant it the p-value is below some critical threshold α.
+
+It is important to emphasise that the exact p-value is conditional not only on the truth of the null hypothesis, but also on all other assumptions underlying the statistical model, such as lack of systematic bias, independent observations, etc. We'll discuss some of this assumptions later.
 
 
-## Some statistical tests
+### Confidence Interval for hypothesis testing
+
+Although the confidence intervals is a tool for estimation and not for hypothesis testing, we can use it also for hypothesis testing. Instead of generating the sampling distribution under the null hypothesis for the tests statistic and comparing the tests statistic with this sampling distribution to obtain the p-value (steps 3 & 4 in the hypothesis testing process above), we generate the confidence interval and observe whether the null hypothesis value lies within its limits or outside them. Then, if the null hypothesis value lies within the confidence interval limits, we can't reject it, the results are not significant, whereas if the value lies outside the confidence interval limits, the result is significant and there is sufficient evidence to reject the null hypothesis.
+
+Using a confidence level of 95% and a significance level of 5% will lead to the same results, because they are complementary. And the same happens for a confidence level of 99% and a significance level of 1%. If a 99% confidence interval does not include the null hypothesis, then we can reject it with a p-value < 0.01.
 
 
+## Statistical tests
+
+In this section, we are going to discuss some of the standard tests to 
 
 
 
