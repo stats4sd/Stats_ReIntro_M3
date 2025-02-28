@@ -137,5 +137,33 @@ sum(distr.ft$probx[distr.ft$tots>=121])*100
 
 ```
 
+## Bootsrap 95% CI
+```{r}
+Mostra_Orig<-sample(Whale$length.m.,400, replace = FALSE) 
+
+t.test(Mostra_Orig)
+
+mostra_bootstrap<-c()
+
+for (i in 1:5000){
+  mostrai<-sample(Mostra_Orig,200, replace = TRUE)
+  meani<-mean(mostrai)
+  mostra_bootstrap<-c(mostra_bootstrap,meani)
+}
+
+## 95% Bootstrap CI
+quantile(mostra_bootstrap,probs=c(0.025, 0.975))
+
+## Plot
+boot_mostra<-data.frame(mostra_bootstrap)
+
+ggplot(boot_mostra, aes(x=mostra_bootstrap))+
+  geom_histogram()+
+  labs(x="resample mean")+
+  geom_vline(xintercept = quantile(mostra_bootstrap,probs=c(0.025, 0.975)), linetype=2,colour = "red")
+  
+
+
+```
 
   
