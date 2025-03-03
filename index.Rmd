@@ -63,8 +63,26 @@ Whale %>%
 
 In this third workbook, we are going to be taking a closer look at hypothesis testing.
  
+Hypothesis testing is the process that allows us to answer questions about our data, our population and our models. It is a well defined process that is performed always in the same way, although the calculations and the data involved will differ depending on the test performed or the question to be answered. It is related to and can used along some of the results we learned in Module 2, especially the concept of precision measures such as the confidence interval. And we will use the method of hypothesis testing in Module 4 and 5 when we will discuss model fitting.
 
-In these workbooks all output produced will come from the use of R, and all of the code used in the workbooks can be found on GitHub here: <https://github.com/stats4sd/Stats_ReIntro_M3>. But the principles are identical regardless of which data analysis tool is being used.Whichever tool is being used for data analysis - it will require that the user is familiar enough with it to be able to generate any sort of summary or plot or transformation that they might suddenly think could be useful!
+This is a basic topic in statistics, because it lays the foundations of the *statistical inference*, the process that allows us to make statements and answer questions about a population with incomplete information — we only have the data contained in the sample. 
+
+The experience tells us that this is one of the hardest topics to learn. We’ll try to avoid all the mathematical apparatus around it, and concentrate in a few important concepts and in the process to test statistical hypothesis.
+
+In this session, we will cover:
+
+-   What is a statistical hypothesis and the concept of the null hypothesis.
+
+-   The concept of p-value, whether to use one side or two sides of the sampling distribution to compute it, and how it is related to the confidence interval seen in Module 2.
+
+-   What is the statistical significance, α.
+
+-   The process of testing hypothesis. 
+
+-   Some basic statistical tests that use the hypothesis testing method.
+
+In these workbooks all output produced will come from the use of R, and all of the code used in the workbooks can be found on GitHub here: https://github.com/stats4sd/Stats_ReIntro_M3. But the principles are identical regardless of which data analysis tool is being used. Whichever tool is being used for data analysis - it will require that the user is familiar enough with it to be able to generate any sort of summary or plot or transformation that they might suddenly think could be useful!
+
 
 ## Data being used in this workbook
 In this session we are going to use a public dataset produced by the Ocean Biodiversity Information system (OBIS). It contains the Historic whale catch records from Australian whaling stations (1925-1978). The full data set and other details can be found here <https://obis.org/dataset/43e4c2cc-5886-427f-a4a9-d47d2635d246>. It contains 38267 records, but we will use a subset: the data corresponding to the most common caught whale, the Humpback (Megaptera novaeangliae) in the years 1949 to 1962. 
@@ -77,7 +95,7 @@ DT::datatable(Whale)
 
 ## What is an 'Hypothesis' 
 
-**Question** What is the proportion of males among humpback whales? 
+**Question**: What is the proportion of males among humpback whales? 
 
 Without knowing too much about whales, the obvious answer might be to guess that it would be 50%. Actually within our dataset there was one labelled as a hermaphrodite, not enough to make much of a difference to the % - but we will consider the variable of interest here as "the % of whales which are male", for the sake of creating an easier to analyse binary variable.
 
@@ -124,7 +142,7 @@ The *null hypothesis* is the 'default' hypothesis that we work with until we hav
 
 -   The proportion of male whales is equal to the proportion of female whales
 
-The null hypothesis is what we are willing to assume is the case until proven otherwise. It is extremely conservative, denying any progress or change! However, this does not mean that we believe the null hypothesis is literally true; we are never looking to claim that the null hypothesis has actually been proved; instead we are only ever looking for evidence *against* the null hypothesis. 
+The null hypothesis is what we are willing to assume is the case, until proven otherwise. It is extremely conservative, denying any progress or change! However, this does not mean that we believe the null hypothesis is literally true; we are never looking to claim that the null hypothesis has actually been proved; instead we are only ever looking for evidence *against* the null hypothesis. 
 
 In the words of Ronald Fisher, the father of modern statistics:
 
@@ -270,7 +288,7 @@ So we need to define a *significance level*, denoted by α, which is the critica
 
 The most commonly used significance level (α) is 0.05 or 5%, but in some fields a level of 0.1 (10%) or 0.01 (1%) is more conventional, and there is a strong movement in favour of setting the threshold at 0.005 (https://www.nature.com/articles/s41562-017-0189-z). Therefore, some hypothetical results may be significant at one threshold but not at an other.
 
-So we must acknowledge that this threshold is arbitrary. For example, if we use α = 0.05, a p-value of 0.0499 is essentially not different from a p-value of 0.0501, but we would make a completely different decision if we strictly followed the significance level rule. Values well above or well below α lead us to a straightforward decision, whereas values close to α usually lead to an inconclusive decision.
+However, we must acknowledge that this threshold is arbitrary. For example, if we use α = 0.05, a p-value of 0.0499 is essentially not different from a p-value of 0.0501, but we would make a completely different decision if we strictly followed the significance level rule. P-values well above or well below α lead us to a straightforward decision, whereas p-values close to α usually lead to an inconclusive decision.
 
 
 
@@ -288,7 +306,7 @@ There are a large number of different 'hypothesis tests' (see the section on *St
 
 5-  Declare the result is significant if the p-value is below some critical threshold α.
 
-There is a good chance if you have been taught statistics at school or undergraduate level you may have had to calculate many of these steps by hand and been asked to consult long tables of numbers containing test statistics and critical thresholds. 
+There is a good chance if you have been taught statistics at school or undergraduate level you may have had to calculate many of these steps by hand, and been asked to consult long tables of numbers containing test statistics and critical thresholds. 
 
 Thankfully this process has been obsolete for at least 50 years at this point (even if it is still regularly taught to students!), as we now have computers to do this for us.
 
