@@ -90,7 +90,7 @@ DT::datatable(Whale)
 
 ## What is an 'Hypothesis' 
 
-What is the proportion of male among humpback whales? Without knowing too much about whales, one may answer 50%, so half of the whales are male and the other half are female. Actually, one out of the 23581 whale was labelled as hermaphrodite, but we can ignore this, an assume that the whales are either male or female.
+What is the proportion of males among humpback whales? Without knowing too much about whales, one might answer 50%, so half of the whales are male and the other half are female. Actually, one out of the 23,581 whale was labelled as hermaphrodite, but we can ignore this, and assume that the whales are either male or female.
 Let's have a look at the data. The figure below shows the percentage of male whales for the period 1949-1962, the only period with data for every year and with at least 100 catches per year.
 
 
@@ -99,44 +99,62 @@ img <- readPNG("img/MalePerc.png")
 grid.raster(img)
 ```
 
-If there was no difference in the underlying proportions of male and female whales, then each year there would be a 50:50 chance to have more male than female catches, or more female than male catches, just like flipping a coin. But having more male than female every year for fourteen years is like flipping a fair coin 14 times in a row and getting heads every time. The probability of this happening is 0.5^14, which is a small number: 0.0000610, and if we take into account the other four years with more than 100 catches, 1925-28, all of them with proportions of male above 0.5, the probability of this happening, if there is a 50:50 chance to have a male or a female whale would be 0.00000381. If we observed this in a coin-flipping experiment, we could confidently claim that the coin was not fair.
+If there were no difference in the underlying proportions of male and female whales, then each year there would be a 50:50 chance of having more male than female catches, or more female than male catches - just like flipping a coin. However, having more male than female every year for fourteen years is like flipping a fair coin 14 times in a row and getting heads every time. The probability of this happening is 0.5^14, which is a small number: 0.0000610.
 
-So, we can ask ourselves the question whether the true proportion of males among the humpback wales can really be 50%? The process we follow to answer a question like this is called *Hypothesis Testing*.
+If we take into account the other four years with more than 100 catches (1925-28), all of them with proportions of males above 0.5, the probability of this happening - if there were a 50:50 chance to have a male or a female whale - would be 0.00000381. If we observed this in a coin-flipping experiment, we could confidently claim that the coin was not fair.
 
-We can define a hypothesis as a proposed explanation for a phenomenon. It is not the absolute truth, but a provisional, working assumption. Sometimes it is useful to use the analogy with the suspect in a criminal case.
+So, we can ask ourselves whether the true proportion of males among the humpback whales can really be 50%? The process we follow to answer a question like this is called *hypothesis testing*.
+
+We can define a hypothesis as a proposed explanation for a phenomenon. It is not the absolute truth, but rather a provisional, working assumption. Sometimes, it is useful to draw an analogy with the suspect in a criminal case.
 
 
 ## The Null Hypothesis
 
-The *Null Hypothesis* is the hypothesis, a proposed explanation for a phenomenon, that we are going to work with until we have sufficient evidence against it. In the example of the proportion of male whales, we could state the null hypothesis as:
+The *null hypothesis* is the hypothesis - a proposed explanation for a phenomenon - that we work with until we have sufficient evidence against it. In the example of the proportion of male whales, we could state the null hypothesis as:
 
 -   The proportion of male whales is 50%, or
 
--   the proportion of male whales is equal to the proportion of female whales.
+-   The proportion of male whales is equal to the proportion of female whales.
 
-The null hypothesis is what we are willing to assume is the case until proven otherwise. It is extremely conservative, denying any progress or change. However, it doesn't mean that we believe the null hypothesis is literally true, we can never claim that the null hypothesis has been actually proved. In the words of Ronald fisher, the father of modern statistics, "the null hypothesis is never proved or established, but is possibly disproved, in the course of experimentation. Every experiment may be said to exist only in order to give the facts a chance of disproving the null hypothesis." (R.A. Fisher (1935), The Design of Experiments. Oliver and Boyd, p.19).
+The null hypothesis is what we are willing to assume is the case until proven otherwise. It is extremely conservative, denying any progress or change. However, it does not mean that we believe the null hypothesis is literally true; we can never claim that the null hypothesis has actually been proved. 
 
-There is a strong analogy with criminal trials in the English, but not only the English, legal system: a defendant can be found guilty. but nobody is ever found innocent, simply not proven guilty. Similarly, we may find that we reject the null hypothesis, but if don't have enough evidence to do so, it doesn't mean that we can accept it as truth. It is just a working assumption until something better comes along.  
+In the words of Ronald Fisher, the father of modern statistics:
+
+*"the null hypothesis is never proved or established, but is possibly disproved, in the course of experimentation. Every experiment may be said to exist only in order to give the facts a chance of disproving the null hypothesis."*
+
+*(R.A. Fisher (1935), The Design of Experiments. Oliver and Boyd, p.19).*
+
+There is a strong analogy with criminal trials in the English – and indeed many other – legal systems: a defendant can be found guilty, but nobody is ever found innocent, simply not proven guilty. Similarly, we may find that we reject the null hypothesis, but if we don't have enough evidence to do so, it doesn't mean that we can accept it as truth. It is just a working assumption until something better comes along.  
 
 
 ## The p-value
 
-Let's suppose we obtain a sample on n=200 units from the population of whales and obtains the following proportions:
-- Male: 60.5%
-- Female: 39.5%
-and the difference is 21.00%. 
-The crucial question is whether this difference is big enough to provide evidence against the null hypothesis that the difference is = 0. 
+Let's suppose we obtain a sample of *n=200* units from the population of whales and obtain the following proportions:
 
-50% is the probability of obtaining heads when tossing a coin. We can then toss the coin 200 times and observe the proportion of heads in the sample. An we could repeat the process many times, say 10000 times, and see what distribution of proportions of males we obtain. The result we obtained is the one shown in the figure below
+-   Male: 60.5%
+
+-   Female: 39.5%
+
+and the difference is 21.00%. 
+
+The crucial question is whether this difference is large enough to provide evidence against the null hypothesis that the difference is equal to zero. 
+
+50% is the probability of obtaining heads when tossing a coin. We can then toss the coin 200 times and observe the proportion of heads in the sample. And we could repeat the process many times, say 10,000 times, and see what distribution of proportions of males we obtain. The result we obtained is the one shown in the figure below
 
 ```{r fig2, out.width="80%", echo = FALSE}
 img <- readPNG("img/PermTest.png")
 grid.raster(img)
 ```
 
-The figure shows that, out of 10000 simulations of observing how many successes we got in 200 tries, if the probability of success was 0.5, in only 15 cases we obtained 121 (200*60.5=121) or more successes. So, is it possible that, being the true probability of male/female whales equal 0.5, we observed 121 males in a random sample of 200 whales? The answer is YES, it is possible although very unlikely, as we obtained 121 or more in just 15 out of 10000, a proportion of 0.15%
+The figure shows that, out of 10,000 simulations of observing how many successes we got in 200 tries, if the probability of success was 0.5, we obtained 121 (200x0.605=121) or more successes in only 15 cases. 
 
-Instead of running a simulation of 10000 runs, we could have systematically worked through all the possible permutations of the whale sample. Each of these would generate an observed proportion of male whales, and plotting these would produce a smoother distribution than just for 10000 simulations. Unfortunately, the number of permutations is too high, that cannot be obtained with the current means in the lifetime of a person. Fortunately, though, we don't have to perform these calculations since the probabilty distribution for the proportions under the null hypothesis it is based in what is known as the binomial distribution, which gives the probability of a number of successes out of *n* trials for a given probability of success, 0.5 in our case. The figure below shows the probability density function (*A*) an the cumulative probability distribution function (*B*). In both cases, the value 121 is highlighted with a vertical line, to show how likely is to obtain 121 successes or more in 200 trials where the probability of success is 0.5. This probability is 0.11397%.
+So, is it possible that, if the true probability of male and female whales is equal (0.5), we observed 121 males in a random sample of 200 whales? The answer is YES, it is possible, although very unlikely, as we obtained 121 or more in just 15 out of 10,000, a proportion of 0.15%
+
+Instead of running a simulation of 10,000 runs, we could have systematically worked through all the possible permutations of the whale sample. Each of these would generate an observed proportion of male whales, and plotting these would produce a smoother distribution than just using 10,000 simulations. Unfortunately, the number of permutations is so high that it cannot be obtained with current means within a person's lifetime.
+
+Fortunately, though, we don’t have to perform these calculations, since the probability distribution for the proportions under the null hypothesis is based on what is known as the binomial distribution, which gives the probability of a number of successes out of n trials for a given probability of success — 0.5 in our case.
+
+The figure below shows the probability density function (A) and the cumulative probability distribution function (B). In both cases, the value 121 is highlighted with a vertical line, to show how likely it is to obtain 121 successes or more in 200 trials where the probability of success is 0.5. This probability is 0.11397%.
      
 
 ```{r fig3, out.width="80%", echo = FALSE}
@@ -144,12 +162,16 @@ img <- readPNG("img/distr and cumul disrt ft.png")
 grid.raster(img)
 ```
 
-this probability is the so-called *p-value*, one of the most prominent concepts in statistics as practised today. A more formal definition of p-value is *a p-value is the probability of getting a result at least as extreme as we did if the null hypothesis were really true*.
+This probability is the so-called *p-value*, one of the most prominent concepts in statistics as practised today. A more formal definition of *p-value* is *a p-value is the probability of obtaining a result at least as extreme as the one we observed assuming the null hypothesis is really true*.
 
 
 ## One-sided or two-sided test
 
-As we have seen in the previous section, the p-value is the probability of getting a result at least as extreme as we did if the null hypothesis were really true. What do we mean by *extreme*? The p-value we obtained, 0.11% is *one-tailed* because it only measures how likely is that we have observed such an extreme value (60.5%) in favour of males if the null hypothesis was really true. this p-value corresponds to what we know as *one-sided test*. But if we had observed the same proportion of females, would have made us suspect that the null hypothesis does not hold. Therefore, we should also calculate the probability of observing 60.5% of either male or female. This is what is known as the *two-tailed* p-value that corresponds to the *two-sided test*. The two-tail probability is twice the one-sided probability, 0.23% or 0.0023.
+As we saw in the previous section, the p-value is the probability of obtaining a result at least as extreme as ours if the null hypothesis were really true. What do we mean by *extreme*? 
+
+The p-value we obtained, 0.11% is *one-tailed* because it only measures how likely is that we have observed such an extreme value (60.5%) in favour of males if the null hypothesis was really true. This p-value corresponds to what we know as *one-sided test*. 
+
+However, if we had observed the same proportion of females, it would also have made us suspect that the null hypothesis does not hold. Therefore, we should also calculate the probability of observing 60.5% of either male or female. This is what is known as the *two-tailed* p-value that corresponds to the *two-sided test*. The two-tail probability is twice the one-sided probability, 0.23%, or 0.0023.
 
    
 
@@ -161,29 +183,33 @@ grid.raster(img)
 
 ## Statistical significance
 
-In our example of the proportion of male/female whales, we had the following:
+In our example of the proportion of male and female whales, we had the following:
 
--   *Null hypothesis*: the proportion of male whales is 50%
+-   *Null hypothesis*: the proportion of male whales is 50%.
 
--   We obtained the simple random sample of *n=200* whales
+-   We obtained a simple random sample of *n=200* whales.
 
--   We observed the sex and *measured the proportion of male whales in the sample: 60.5%*
+-   We observed the sex and *measured the proportion of male whales in the sample: 60.5%*.
 
--   We obtained the *p-value = 0.0023*: the the probability of obtaining a value as extreme of this if the null hypothesis. This is the *two-sided test*.
+-   We obtained the *p-value = 0.0023*: the probability of obtaining a value as extreme as this if the null hypothesis is true. This is the *two-sided test*.
 
-Even if there is a very small chance that we had obtained this percentage of male female if the null hypothesis was really true, the p-value is small enough for us to say that the results are *statistically significant*, or the difference between the population value (the proportion of male in our example) and the null hypothesis is *significantly different from zero*. The differences between the proportion of males observed in the sample and the null hypothesis value cannot be due to random variation, it happened because the population value *is not equal to the null hypothesis*, and the sample data provides the evidence for this. 
+Even if there is only a very small chance that we would have obtained this percentage of percentage of males and females if the null hypothesis was really true, the *p-value* is small enough for us to say that the results are *statistically significant*. In other words, the difference between the population value (the proportion of male in our example) and the null hypothesis is *significantly different from zero*. 
 
-Since we have incomplete information about the population, we only have the sample, we can always be wrong making statements like the one above: "the proportion of male whales is significantly different from 0.5". However, we control the risk of being wrong when rejecting the null hypothesis: the p-value. using the analogy with criminal trials in the English legal system, the sample data provide the evidence against the innocence of the defendant, and p-value is the probability of being wrong if the defendant is declared guilty.
+The difference between the proportion of males observed in the sample and the null hypothesis value cannot be explained by random variation alone. It occurred because the population value *is not equal to the null hypothesis*, and the sample data provides the evidence for this. 
 
-We need to define a *significance level*, denoted by α, the critical threshold value for the p-value so, 
+Since we have incomplete information about the population — we only have the sample — we can always be wrong when making statements like like the following: *"the proportion of male whales is significantly different from 0.5"*. However, we control the risk of being wrong when rejecting the null hypothesis through the p-value. 
 
--   if the p-value <= α, the result is statistically significant, and we reject the null hypothesis
+Using the analogy of criminal trials in the English legal system, the sample data provide the evidence against the innocence of the defendant, and p-value is the probability of being wrong if the defendant is declared guilty.
 
+We need to define a *significance level*, denoted by α, which is the critical threshold value for the p-value. Therefore: 
+
+-   if the p-value ≤ α, the result is statistically significant, and we reject the null hypothesis
+ 
 -   if the p-value > α, the result is not statistically significant, and we cannot reject the null hypothesis
 
-The most commonly used significance level (α) is 0.05 or 5%, but in some cases a level of 0.1 (10%) or 0.01 (1%) may be used. Therefore, our result may be significant at α=0.05 but not at α=0.01, or can be significant at both levels or at neither level. 
+The most commonly used significance level (α) is 0.05 or 5%, but in some cases a level of 0.1 (10%) or 0.01 (1%) may be used. Therefore, our result may be significant at α = 0.05 but not at α = 0.01. Alternatively, it may be significant at both levels or at neither. 
 
-However, we must acknowledge that this threshold is arbitrary. For example, if we use α = 0.05, a p-value of 0.0499 is basically not different from a p-value = 0.0501, but we would make a completely different decision if we stick to the significance level rule. Values well above or well below α lead us to a straightforward decision, values close to α usually lead to an inconclusive decision.
+However, we must acknowledge that this threshold is arbitrary. For example, if we use α = 0.05, a p-value of 0.0499 is essentially not different from a p-value of 0.0501, but we would make a completely different decision if we strictly followed the significance level rule. Values well above or well below α lead us to a straightforward decision, whereas values close to α usually lead to an inconclusive decision.
 
 
 
@@ -213,481 +239,231 @@ Using a confidence level of 95% and a significance level of 5% will lead to the 
 
 ## Statistical tests
 
-In this section, we are going to discuss some of the standard tests to 
+In this section, we are going to discuss some standard tests used to answer questions about our data. We are not going to go into the mathematical details, we will focus on the type of test and things to consider when running the test. There are plenty of resources on this tests that you can easily find. 
+
+Before any formal hypothesis test, always look at summary statistics and plots showing the relationship you are interested in.
 
 
+### Comparing the mean of one numeric variable to a value: t-test and Wilcoxon Signed-Rank test
 
-## Sampling and non-sampling errors
-One sample is selected at random but other potential samples could have been selected, which may have produced different results. The difference between a statistic derived from a sample and the (unknown) population value is caused by what are known as the sampling and non-sampling errors. These errors are inevitable and, despite its name, "error", it doesn't mean necessarily that we have done something wrong or made a mistake. 
+We will develop this first test a little deeper, so you can check all the steps in the hypothesis testing. You can skip the most mathematical bits form, as they will be performed by your statistical software of choice, although they may help you to better understand the output.
 
-The sampling error comes from the fact that just a part of the population is included in the sample, and therefore the estimate will (most likely) be different from the population value. The sampling error affects the precision of the estimate. We will always have sampling error, it's inevitable, but we know how to handle it. See below in the Estimation section to understand what this means.
-
-The non-sampling errors come from all other fronts:
-
--   the sample is not representative, for example in a fish survey some selected sites may not be observed due to rough weather conditions; sites farthest from shore are the most typical to have such weather problems, 
-
--   not measuring all the sample units, for example a non-response in a survey or an animal or plant that dies.
-
--   measuring the characteristic with measurement or recording error. For example, in the Humpback dataset, there are 31 whales with length = 0, or misrecording a whale with actual length = 12.79m as 17.29m.
-
--   when dealing with humans, response bias is a source of non-sampling errors. It happens when a number of different conditions or factors may cue respondents to provide inaccurate or false answers during surveys or interviews. For example, a professor is asking their students whether they have ever cheated on exams in his class, the participants are not likely to respond truthfully; instead their responses are biased toward responses that are expected from them.
-
-
-The non-sampling affect the accuracy of the estimates, and are the cause of bias.
-
-Non-sampling errors are unavoidable, but they can be reduced being careful during design and data collection stages:
-
--   At planning stage, all potential non-sampling errors are listed and steps taken to minimise them are considered. You should establish a sensible data quality assurance system.
-
--   Critically view the data collected and attempt to resolve queries immediately they arise.
-
--   Document sources of non-sampling errors so that results presented can be interpreted meaningfully.
-
--   If data are collected by others, ensure you understand the data collection process and the quality assurance system that was put in place before you decide to use the data.
-
-Designing a sample using a scientific approach can help to minimise sampling error and create estimates that are precise and unbiased.
-
-## Probabilistic and non-probabilistic sampling
-
-Sampling methods can be categorised into two very broad classes on the basis of how the sample was selected: probabilistic and non-probabilistic sampling. 
-
-In a probabilistic sampling scheme, every element in the population has a known, non-zero probability of being included in the sample. A non-probabilistic sampling plan doesn't have this feature.
-
-In probabilistic sampling, because every element has a known chance of being selected, we can obtain unbiased estimates of the population characteristics of interest, and we can also know their precision. 
-
-Non-probabilistic sampling, on the other hand, does not have this feature, and we don't have a firm method of assessing either the reliability nor the validity of the resulting estimates. 
-
-In the coming sections we are going to describe some of the most popular sampling methods in environmental sciences.
-
-
-### Sampling frame
-
-In probabilistic sampling, the probability of any element appearing in the sample must be known. To accomplish this we need some list of all the population units from which the sample can be selected. This list is called a *Sampling Frame* and should have the property that every element in the population has some chance of being selected in the sample by whatever method is used to select elements from the sampling frame.
-
-Ideally, a sampling frame should be a complete list of all members of the target population. In reality, however, this is rarely the case in the environmental sciences. In some situations it is impossible to devise a sampling frame for the study population. Suppose we are interested in the birds that cross an area (say a valley) during their spring migration; in this case, we won't be able to  finish the list until the seasonal migration is complete. 
-But even when a sampling frame is not available, random sampling can sometimes be applied, for example using systematic sampling. This will be discussed below in the *Sampling strategies in environmental sciences* section.
-
-
-## Basic Sampling: Simple Random Sampling
-
-In the previous sections we have seen what happens when we take several samples from the same population. However, in a research study we usually can get just one sample, so we have to make most of it. 
-
-Simple Random Sampling (SRS) is the probabilistic sampling design in which every unit in the population has exactly the same probability to be selected. It is the most efficient sampling design, as it provides the most precise estimates of the population characteristic for a given sample size, and these estimates are unbiased.
-
-The winning numbers of the lotto, the result of rolling a dice or tossing a coin are examples of simple random sampling, as we know beforehand that all the possible outcomes have exactly the same probability.we can extract a Simple Random Sample of whales from our dataset by allocating the same probability to be selected to each whale. 
-
-Unfortunately, not always it is possible to use this sampling plan We will discuss later, in the *Sampling strategies in environmental sciences* section, other options when SRS is not possible or economically inefficient.
-
-
-
-## Estimation
-
-In a SRS, *the best estimate* for the 
-
--   *population mean* is the sample mean
-
--   *population variance* is the sample variance
-
--   *population proportion (or probability)* is the sample proportion.
-
-The estimate is *best* because it is unbiased and with maximum precision. 
-
-These estimates provide a single value for the population characteristic, they are known as the point estimates. If the SRsampling has been conducted properly we can expect no biases. However, as we saw previously in the sample obtained by rolling a dice several times, they are not (in general) equal to the population value, sometimes they are going to be greater than it, sometimes smaller, and in a very few cases, equal to sample mean.
-
-We, therefore, would like to know how precise our estimate is, how close it is to the population value. So we add to the point estimate a measure of precision of it. There are different ways of computing this degree of precision (or uncertainty):
-
--   *standard error* (usually used for means or variances)
-
--   *margin of error* (usually used for proportions)
-
--   *confidence interval* (used by both: means, variances and proportions).
-
-All of them are related, so if you know one of them you can easily obtain the other two. For example, a possible margin of error is calculated as: Margin of error = 2 × standard error. We will discuss the confidence interval in the next sub-section.
-
-note that we use the term *error* to measure the degree of precision/uncertainty in or estimates.
-
-If we obtain *k* samples of *n* units each from the same population, and compute the mean of each sample, we will have *k* estimates of the population mean (and the same applies for the variance or the proportion, when applicable), as their means will vary from one sample to another. Like the series of observations in each sample, the sample of *k* sample means has a standard deviation. The standard error of the mean of one sample is an estimate of the standard deviation that would be obtained from the means of a large number of samples drawn from that population.
+The *t-test* for one variable tests the null hypothesis that the population mean is equal to a value: $$H_0: \mu = \mu_0$$, where $\mu_0$ is a numeric value. 
+the test statistic is $$ t=\frac{\bar{x}- \mu_0}{\frac{s}{\sqrt{n}}}$$, where
  
-One of the interesting characteristics of the three precision/uncertainty measures above is that they depend on the sample size *n*. Specifically, they are a function of *1/sqrt(n)* where *n* is the sample size. Therefore, the larger the sample size, the more reduced will the uncertainty measures of the estimates be. However, the gain in precision is big when we increase a small sample by one unit, but this gain will decrease as the sample size increases. 
-
-The figure below shows how the standard error (SE) of the mean varies with the sample size for the sample of results obtained by rolling a dice *n* times. For very small sample sizes, an increment of the sample size implies a sizable decrease in the SE of the mean, whereas, as the sample size grows, the decrease in the SE of the mean for one extra element in the sample tends to zero.   
-
-
-Since the precision of our estimate depends on the sample size, it can be established at design stage, before we collect the data provided that we have some prior information. We will need an estimate of the population
-
--   variance/standard deviation to obtain the SE of the mean: SE=std(y)/sqrt(n)
-
--   proportion to obtain the SE of a proportion SE=sqrt(p(1-p)/n)
-
-from previous data or knowledge.
-
-It is important to realise that we do not have to take repeated samples in order to estimate the standard error, there is sufficient information within a single sample. 
-
-An interesting result of this is that the sample size depends on the precision you would like to achieve (or that the precision of your estimates will depend on the sample size), but it does not depend on the population size, provided that your population is large enough. The sample size is a figure, not a percentage!!
-For small populations, and small here means up to some hundreds, a correction applies, so we won't get sample sizes greater than the population size!
-
-
-### Confidence Interval
-
-*A confidence interval gives an indication of the degree of uncertainty of an estimate and helps to decide how precise a sample estimate is*. It specifies a range of values likely to contain the unknown population value. These values are defined by lower and upper limits, and the probability that the Confidence Interval includes the true population value is given by the confidence level.
-
-The width of the interval depends on the actual precision of the estimate and the confidence level used. A greater standard error will result in a wider interval; and the wider the interval, the less precise the estimate will be.
-
-A 95% confidence level is by far the most commonly used. However, it is possible to calculate the CI at any given level of confidence, such as 90% or 99%. But why 95%? It was set by the father of modern statistics himself, Sir Ronald Fisher. In 1925, Fisher picked 95% because the distance from the center of the Confidence Interval and the upper or lower limit is almost 2 times (1.96 times, to be precise) the standard error of the estimate. This threshold has since persisted for almost a century. It is a good compromise between being almost sure (95%) that it includes the population value, and not being so extremely wide that it wouldn't be useful for estimation purposes.
-
-For a confidence level of 95%, if we drew 20 random samples and calculated a 95% confidence interval for the mean for each sample using the data in that sample, we would expect that, on average, 19 out of the 20 (95%) resulting confidence intervals would contain the true (and unknown) population value and 1 in 20 (5%) would not. So, most of the time, but not always. If we increased the confidence level to 99%, wider intervals would be obtained to increase the probability to include the true value, and only one out of 100 times we will get a confidence interval does not include the true value.
-
-To calculate confidence intervals around an estimate we use the standard error (or the margin of error) for that estimate. The estimate and its 95% confidence interval are presented as: the estimate plus or minus the margin of error.
-The lower and upper 95% confidence limits are given by the sample estimate plus or minus 2 standard errors.
-
-
-For the purposes of this demonstration we are going to use two examples of the Humpback Whale data set.
-The number of Humpback whales in the data set is 23581, large enough to assume that the characteristics of interest  
-in the population of Humpback whales (length and sex) are basically these in the sample.
-
-Let's have a look at the data
-
-```{r, echo = FALSE}
-DT::datatable(Whale)
-```
-
-The two variables we are interested in are the *sex* of the whale and its *length*.
-The table below shows the number and percentage of whales in each sex. 
-
-```{r whale_sex_table,echo=FALSE}
-Whale %>%
-  group_by(sex) %>%
-    summarise("Number"= n(), 
-              "Percentage" = scales::percent(n()/nrow(Whale),0.1)) %>%
-  gt::gt()
-```
-
-There are roughly 60% of Male and 40% of female whales. Does this result show that these are, approximately, the true proportions of each sex? Or does it show that it is easier to catch male than female whales? Or does it show that the whalers were more interested in male than in female whales? We don't know, but for the purpose of this exercise, we will assume that these are the true proportions of male and female whales: 59.7% are male and 40.2% are female.Note also that for 25 whales out of 23581 (0.1%) sex could not be identified, and 1 whale was hermaphrodite!
-
-the table below summarises the length of the whales
-
-```{r sum_table, echo = FALSE}
-
-  gt::gt(table_stat) %>%
-  gt::fmt_number(columns = 2)
-  
-```
-
-Take a look at graphical display of the length in the interactive plot below
-
-```{r v1_ui, context="render",echo=FALSE}
-
-  selectInput("plot_type",label = "Type of Visualisation",
-              choices =choices)
-  plotlyOutput("plot1")
-
-```
-
-
-```{r v1_server,context="server"}
-  output$plot1 <- renderPlotly({
-    
-    if(input$plot_type=="boxplot"){
-      outs1<-quantile(Whale$length.m.,c(0.25,0.75))+c(-1,1)*diff(quantile(Whale$length.m.,c(0.25,0.75)))*1.5
-      outs<-Whale %>%
-        filter(length.m.<outs1[1] | length.m.>outs1[2])
-    } 
-    
-(ggplot(Whale)+
-    {if(input$plot_type=="histogram")geom_histogram(aes(x=length.m.))}+
-    {if(input$plot_type=="boxplot")geom_boxplot(aes(y=length.m.))}+
-      {if(input$plot_type=="density")geom_density(aes(x=length.m.))}+
-    {if((input$plot_type=="density"|input$plot_type=="histogram")) labs(x="Length (m)") }+
-    {if((input$plot_type=="boxplot")) labs(y="Length (m)") }+
-    plot_theme+
-    ggtitle(paste(names(choices)[choices==input$plot_type]," - Length (m)")))  %>% 
-      ggplotly()
-})
-    
-```
-
-
-
-Let's assume that the 23550 whales reported in the dataset are the population of whales in the Australian shores, and let's see what happens if we takes samples from it and observe how the sample mean of the length and the proportion of male/female, the estimate for the population mean and the proportion of male/female, behave as we obtain a new sample. The sampling method used is Simple Random sampling, each unit has exactly the same probability to be selected.
-
-
-```{r sample_ui, context="render",echo=FALSE}
-
-  sliderInput("n_sample",label = "Sample Size",min = 5,max=500,value = 50,step = 5)
- sliderInput("conf_level",label = "Confidence Level",min = 0.5,max=0.999,value = 0.95,step = 0.001)
-  actionButton("go2","Make New Sample!")
-  selectInput("type",label="Plot Type",choices = c("violin","errorbar"))
-  gt_output("table1")
-    plotOutput("ci_plot")
-
-```
-
-
-```{r, sample_server,context="server"}
-
- whale_sample<-reactiveValues(sample=NULL)
-
-whale_summary<-Whale %>%
-  summarise("Mean Length"=mean(length.m.),"SD Length"=sd(length.m.),"SE Length"=sd(length.m.)/sqrt(n()),
-            "% Male"=scales::percent(mean(sex=="Male"),0.1)) %>%
-  mutate(Sample="Complete Data")
-
-
-  observeEvent(input$go2,{
- whale_sample$sample<-slice_sample(Whale,n = as.numeric(input$n_sample),replace=FALSE)
- whale_sample$label<-as.numeric(input$n_sample)
-  })
-
-output$table1<-render_gt({
- if(!is.null(whale_sample$sample)){
-
-  (whale_sample$sample %>%
-  summarise("Mean Length"=mean(length.m.),"SD Length"=sd(length.m.),"SE Length"=sd(length.m.)/sqrt(n()),
-            "% Male"=scales::percent(mean(sex=="Male"),0.1)) %>%
-  mutate(Sample=paste0("Random Sample (n=", whale_sample$label,")"))) %>%
-     full_join(whale_summary) %>%
-     gt() %>%
-     fmt_number()
-
-   
-   
-}
-})
-
-
-output$ci_plot<-renderPlot({
- if(!is.null(whale_sample$sample)){
-
-   if(input$type=="violin"){
- p1<- whale_sample$sample %>%
-  summarise("Mean"=mean(length.m.),"SD"=sd(length.m.),"SE"=sd(length.m.)/sqrt(n())) %>%
-     ggplot(aes(x=1,y=Mean,ymax=Mean+qnorm(1-((1-as.numeric(input$conf_level))/2))*SE,
-                ymin=Mean-qnorm(1-((1-as.numeric(input$conf_level))/2))*SE))+
-       geom_violin(data=whale_sample$sample,aes(x=1,y=length.m.),inherit.aes=FALSE)+
-         geom_point()+
-     geom_errorbar(width=0.05)+
-     geom_violin(data=Whale,aes(y=length.m.,x=2),inherit.aes=FALSE,col="red")+
-          annotate(geom="point",y=mean(Whale$length.m.),x=2, size=4,col="red")+
-     scale_y_continuous(limits=c(5,20))+
-       scale_x_continuous(breaks=1:2,labels=c("Sample","Data"))+
-          ggtitle(paste0(whale_sample$label," samples\n",scales::percent(input$conf_level,0.1)," Confidence Level"))+
-    theme(axis.text = element_text(size=16),title=element_text(size=20))
-   }
-     if(input$type=="errorbar"){
-   whale_sample$sample %>%
-  summarise("Mean"=mean(length.m.),"SD"=sd(length.m.),"SE"=sd(length.m.)/sqrt(n())) ->plt_dt
-       
-       p1<-  ggplot(plt_dt,aes(x=1,y=Mean,ymax=Mean+qnorm(1-((1-as.numeric(input$conf_level))/2))*SE,
-                ymin=Mean-qnorm(1-((1-as.numeric(input$conf_level))/2))*SE))+
-         geom_point()+
-     geom_errorbar(width=0.05)+
-     scale_y_continuous(limits=c(min(c(plt_dt$Mean-qnorm(1-((1-as.numeric(input$conf_level))/2))*plt_dt$SE,10)),
-                                 max(c(plt_dt$Mean+qnorm(1-((1-as.numeric(input$conf_level))/2))*plt_dt$SE,17))))+
-          annotate(geom="point",y=mean(Whale$length.m.),x=2, size=4,col="red")+
-          scale_x_continuous(breaks=1:2,labels=c("Sample","Data"))+
-          ggtitle(paste0(whale_sample$label," samples\n",scales::percent(input$conf_level,0.1)," Confidence Level"))+
-    theme(axis.text = element_text(size=16),title=element_text(size=20))
-     }
-   p1
- }
-})
-
-```
-
-You can also change the sample size. By increasing it, the sample estimates will be closer and closer to the actual population value. The 95% confidence interval changes the centre (because it is the sample mean), but the width change is very small.
-
-You can also change the confidence level. If you increase it from 95% to, say, 99%, you will observe how the confidence interval gets wider, and if you set the confidence level at 90%, the confidence interval will get narrower.
-
-*[SAM, THE ci DOESN'T CHANGE MUCH, NOT SURE IT DOES, BUT IF IT DOES IT IS REALLY DIFFICULT TO SEE THE CHANGE]*
-*[MAYBE WE COULD ADD THIS POSSIBILITY, BEEN ABLE TO CHANGE THE CONFIDENCE LEVEL IN THE NEXT INTERACTIVE PLOT, WHERE THE CHANGES I'M SURE WILL BE EASY TO SPOT]*
-
-
-Now, let's observe what happens with the 95% Confidence intervals. You can generate, by a Simple Random Sampling process, samples of size *n* from the population of whales. For each sample, the 95% Confidence interval will be generate and, until you reset, the confidence intervals are accumulated in the plot.
-
-
-```{r sample_ui2, context="render",echo=FALSE}
-
-  sliderInput("n_sample2",label = "Sample Size",min = 5,max=500,value = 50,step = 5)
- sliderInput("conf_level2",label = "Confidence Level",min = 0.5,max=0.999,value = 0.95,step = 0.001)
-  actionButton("add","Add New Sample!")
-    actionButton("reset","Reset")
+-   $\bar{x}$ is the sample mean
  
-    plotOutput("cumulative_ci_plot")
-
-```
-
-
-```{r, sample_server2,context="server"}
-
- whale_sample2<-reactiveValues(sample=list())
-
-observeEvent(input$reset,{
-  whale_sample2$sample<-list()
-})
-
-whale_summary2<-Whale %>%
-  summarise("Mean"=mean(length.m.))
-
-
-  observeEvent(input$add,{
- whale_sample2$sample<-append(whale_sample2$sample,
-                             list(sample(1:nrow(Whale),size =  as.numeric(input$n_sample2),replace=FALSE)))
-  })
-
-output$cumulative_ci_plot<-renderPlot({
-  
-  p1<-ggplot(whale_summary2)+
-    geom_hline(aes(yintercept=Mean),col="blue")
-  
- if(length(whale_sample2$sample)>0){
-
-   
-   whale_sample2$sample %>%
-     map_df(function(x)slice(Whale,x) %>% summarise(mean=mean(length.m.),n=n(),se=sd(length.m.)/sqrt(n()))) %>%
-     mutate(sample=1:n())%>%
-     mutate(colour=!(((mean + qnorm(1-((1-as.numeric(input$conf_level2))/2))*se)<whale_summary2$Mean) |
-                       ((mean - qnorm(1-((1-as.numeric(input$conf_level2))/2))*se)>whale_summary2$Mean)) )->samples
-     
-   p1<-p1+
-     geom_point(data=samples,
-                   aes(y=mean,x=sample,colour=colour))+
-     geom_errorbar(data=samples,
-                   aes(y=mean,x=sample,ymax=mean+qnorm(1-((1-as.numeric(input$conf_level2))/2))*se,
-                       ymin=mean-qnorm(1-((1-as.numeric(input$conf_level2))/2))*se,colour=colour),inherit.aes = FALSE)+
-     scale_y_continuous(limits=c(min(samples$mean)-3.5*max(samples$se),
-                                 max(samples$mean)+3.5*max(samples$se)))+
-     scale_color_manual(values=c("FALSE"="red","TRUE"="black"))+
-     ggtitle("95% Confidence Intervals")+
-     theme_light()+
-     labs(colour="Includes true value?")
-   
- }
-  print(p1)
-   
+-   $\mu_0$ is the null hypothesis value to be tested
  
-})
+-    *s* is the sample standard deviation
+ 
+-    *n* is the sample size.
 
+This *t* statistic is compared to its sampling distribution were the null hypothesis true (a *Student's t* with *n-1* degrees of freedom), and a p-value is obtained. Then a decision is made based on the p-value and the level of significance we wish to set. 
+
+Lets see an example, we have a sample of 100 whales from our population fo 23,581 whales. The summary statistics are:
+ 
+-   $\bar{x}$ = 13.413
+ 
+-   *s* = 1.429
+ 
+-   *n* = 100
+
+The figure below shows the histogram of the sample lengths.
+
+  
+
+```{r, out.width="80%", echo = FALSE}
+img <- readPNG("img/1sampleHist.png")
+grid.raster(img)
 ```
 
-As the sample size grows, again, the 95% confidence interval will get narrower. For example, if you generate a sample of size n=50 and generate the 95% Confidence interval and then generate a new sample of size n=4*50=200, the width of the new sample 95% Confidence interval will be a half of the first one, as the with of the Confidence interval is proportional to 1/sqrt(n).
 
-95% of the 95% Confidence intervals, or 19 out of 20, should include the population mean, that is represented by the horizontal line in the plot. If you keep generating samples and their corresponding 95% CI long enough, you will find that one Confidence Interval does not include the population mean. to identify it easily it is red instead of the usual black. This is a probabilistic statement, so it may happen in your first sample or may not happen until you have generated 30 samples, but in the long run, the proportion of 95% confidence intervals that do not include the population mean will be around 5% or one out of 20. And this will happen no matter how large is your sample size. Sample size affects the precision of the estimate, the width of the 95% confidence interval, but, by its definition, the 95% Confidence interval will contain the true population value for 95% of the random samples.
+We want to test 
+ 
+-   $\mu_0$ = 13.5
 
-Let's suppose we selected a sample of n=400, the mean of the length was 13.25m, and the 95% Confidence interval [13.106;13.394]. The true average length value, that will usually be unknown, is 13.30m, which is included in the confidence interval. however there are lots of other values, infinite to be precise, that are included in the confidence interval. According to our sample and the confidence interval  we obtained from it, the mean population length of the Humpback whales could be 13.11m, or 13.21m, or 13.31m or any other value within the interval limits. And there is still a small chance, 5%, that the true population mean length is outside the limits, either way. 
-What if we generated the 99% confidence interval instead from the same sample? the 99% CI is [13.061;13.439]. Now, there is just 1% probability that the true value lies beyond the CI limits, but this has a cost, the 99% CI is wider than the 95% CI. 
+Then, the t-statistic is *t* = -60738, and the *p-value* = 0.545, so we can't reject the null hypothesis based on this evidence. 
 
-The confidence interval and the confidence levels are both related to the *p-value* that we are going to present in Workbook 3.
+If we had tested the following null hypothesis, we would have reached the following results:
+ 
+-   $\mu_{01}$ = 13.4, *p-value* = 0.9266, we cannot reject the null hypothesis.
+ 
+-   $\mu_{02}$ = 13.6, *p-value* = 0.1942, we cannot reject the null hypothesis if we set the significance level at α = 0.05, but we wouldn't if α = 0.01.
+ 
+-   $\mu_{03}$ = 13.7, *p-value* =  0.04749, we can reject the null hypothesis if we set the significance level at α = 0.05, but we wouldn't if α = 0.01.
 
-## Sampling strategies in environmental sciences
+The 95% confidence Interval is [13.1296; 13.6968], and the 99% Confidence interval is [13.0379; 13.7885]. You can check which values of the null hypothesis are included within the limits of the Confidence intervals. Note that, although the null hypothesis may change, the limits of the confidence interval don't, unless you change the level of confidence.
 
-In this section, we are going to explore some of the common sampling methods in environmental sciences.
-
-*Stratified Sampling:* is a probability sampling method that involves the division of a population into smaller homogeneous subgroups known as strata prior to sampling. In stratified random sampling, or stratification, the strata are formed based on strata shared attributes or characteristics such as soil characteristics, slope, age or sex of individuals. simple random samples are then taken within each stratum. It is also called proportional random sampling or quota random sampling.
-Strata should be defined carefully, based on the response of the attribute you are estimating to habitat characteristics that are unlikely to change over the time of the study
-• If there is no obvious reason for the difference in your area under investigation, you’re probably better off using a simple random sampling procedure
-• Sampling units do not have to be allocated in equal numbers to each stratum. Some options on how to allocate sub-sample sizes to each stratum are:
-
--   equally to each stratum;
-
--   In proportion to the size of each stratum;
-
--   In proportion to the number of target individuals in each stratum;
-
--   in proportion to the amount of variability in each stratum,
-
-and the sampling method used to obtain the subsamples within each stratum can be any that is considered suitable.
-
-An example of how we could do the sampling in a fish survey: in location A there is good conditions and a high density of fish; location B, however, has less favorable conditions so much fewer fish. Since we would like to have enough fishes from each site, we may choose to stratify to over-sample from location B to be able to understand this environmental gradient more.
+The t.test is based on some assumptions: 
+ 
+-   the sample mean, $\bar{x}$ is normally distributed. For sample sizes *n > 5* this is usually the test, due to the *Central Limit Theorem*. As we will have just one sample mean, we will have just to assume that this is the case.
+ 
+-   The individual observations are independent. This is a very strong assumption, and we will find it in many other tests. It basically means that one measurement does not depend on the previous one. When measuring the length (or observing the sex) of a whale, the length or sex of the previously measured/observed whales do not provide any information on this one: if the previous whale was a male, or a long whale does this provide any further clue on what sex or what length will be the current whale's?. However, the concentration of a pollutant downstream is not independent from the concentration of that pollutant upstream, or the temperature today is not independent from yesterday's.     
 
 
-The method is useful when the attribute of interest responds very differently to some clearly defined habitat structure or when we want to make sure that some areas/characteristics such as sex or age are included in the sample. The recommendations within strata are the same of simple random sampling
+We can test whether the center of a population is a given value, without any assumption on the distribution of the variable or its mean. The for each *parametric test* such as the t-test (it is *parametric* because we make assumptions on the population distribution), there is a *non-parametric* test that we can use when we can't (or we don't want to) make any assumption on the population distribution. They can be used always, even when we could use the parametric test such as the t-test, however, their results are usually less conclusive. 
 
-Pros of stratified sampling: 
+The non-parametric test equivalent to the one-sample t-test is the *Wilcoxon one-sample Signed-Rank test*. It is based on ranks and because of that, the location parameter is not here the mean but the median. This test allows to test the null hypothesis that the *sample median* is equal to a given value:
+$$H_0: median = m_0$$
+Data is then sorted, and the observations are given a value, either *-1* if if $x < m_0$ or *+1* if $x > m_0$. If the true median is $m_0$ then the sum of this new values should be equal to 0 or very close to it. Based on this, we obtain a p-value and we can make de decision.
 
--   it provides a systematic way of gaining a population sample that takes into account the demographic make-up of the population, which leads to stronger research results.
-
--   The method is fair for population units as the sample from each stratum can be randomly selected, meaning there is no bias in the process.
-
--   As participant grouping must be exhaustive and mutually exclusive, stratified random sampling removes variation and the chances of overlap between each stratum.
-
--   Lastly, it helps with efficient and accurate data collection. Having a smaller, more relevant sample to work with means a more manageable and affordable research project.
-
-And the Cons:
-
--   Researchers may hold prior knowledge of the population’s shared characteristics beforehand, which increases the risk for selection bias when strata are defined.
-
--   There is more administration to do to conduct this process, so researchers must include this extra time and order.
-- When randomly sampling each stratum, the resulting sample may not be representative of the full population. This will be addressed by the use of sampling weights during the analysis, a further complication.
-
--   Once you have the final sample, data analysis of the information becomes more complicated to take into account the layers of the stratum.
-
--   for the same sample size, stratified designs yield estimates with lower precision than SRS.
-
-The analysis of data sampled using stratified sampling requires to apply weights when estimating something across the whole population. Getting back to the fish survey, if we select equal subsamples in the two site, the probability to select a fish from oversampled site B will be higher than the probility to select a fish from undersampled site A.  
-
-
-*Cluster sampling* is a probabilistic sampling technique. It involves dividing a population into clusters or groups, selecting a sample of clusters, and then sampling individuals or units within those clusters. The primary purpose of cluster sampling is to simplify the sampling process while still ensuring a representative sample of the population. 
-
-Clusters are formed based on specific characteristics relevant to the research study, such as geographical location, administrative boundaries, or organizational structure. Clusters should be randomly selected from the population to ensure unbiased representation. Randomization helps minimize selection bias and ensures that every cluster has an equal chance of being included in the sample. Clusters should ideally be internally homogeneous, meaning that individuals or units within the same cluster are similar or alike in relevant characteristics. This helps improve the sampling efficiency and enhances the representativeness of the sample. Clusters should be independent of each other to avoid duplication of sampling and ensure that each cluster contributes unique information to the sample. Overlapping or dependent clusters can lead to biased estimates and undermine the validity of the findings.
-
-The sampled clusters become the *Primary Sampling Units (PSU)* from which the individuals or units will be selected, becoming the *Secondary Sampling Units (SSU), using any of the methods described. 
-
-Cluster Sampling Advantages:
-- Efficiency: Cluster sampling is often more efficient than other sampling methods, especially when the population is large or geographically dispersed.
-- Cost-Effectiveness: By sampling entire clusters instead of individual units, you can reduce costs associated with recruitment, data collection, and analysis.
-- Logistical Feasibility: Cluster sampling simplifies the sampling process, making it easier to manage and execute, particularly in field-based or community-based research.
-
-Cluster Sampling Disadvantages
-- Increased Variability: Due to the clustering of individuals within clusters, there is a risk of increased variability in the sample estimates compared to simple random sampling. For a given sample size it yiels estimates that are less precise that those obtained through Simple Random Sampling.
-- Complex Analysis: Analyzing cluster sampling data requires specialized statistical techniques to account for the clustered nature of the sample, which can be more complicated than analyzing data from simple random samples.
-
-
-*Systematic sampling* is a probability sampling method in which researchers select members of the population at a regular interval (or k) determined in advance.If the population order is random or random-like, then this method will give you a representative sample that can be used to draw conclusions about the population.
-
-The pros of systematic sampling are that its easy to use, While it retains an element of randomness, it also introduces some control and process into the selection process, it's low risk and it's resistant to bias, as After the initial starting point is selected, researchers have little control over who/what gets selected for systematic sampling.
-The cons are related to the fact that Systematic sampling can remove some of the unpredictability from a sample, meaning that a researcher could potentially manipulate the results by choosing a starting point that favours their preferred outcome.
-
-*
-We still wish to sample a fraction of 1 in , so if the population size N is unknown, it must be estimated. In this case, the initial study unit is randomly selected from the first k units that become available, for some k. After this, each kth consecutive unit is chosen. For example, we might sample the 3rd person entering a health care clinic on a certain day, and every 10th person thereafter. The sampling frame is compiled as the study progresses.
-*
-*Transect sampling* is a method used to study the distribution and abundance of organisms along a line or pathway. The transect is simply a line that spans the gradient of interest, and then you locate your sample plots along this line (see Figure XXX). The length of your transect would be determined by the gradient you are sampling. For example, research has shown that the “edge effects” of a forest can be seen up to 100 meters into the forest, so to examine this gradient you would want to use a transect at least 100 meters long.
-Locating sample plots along the transect either in a uniform manner (i.e. every 10 meters) or by “randomly stratifying” the sample plots. Random stratification adds the element of randomness to your sample plot select even when using a transect. To randomly stratify your sample plots, divide the transect into logical subdivisions given the length of your transect (i.e. every 50 meters for a 500 meter transect or every 10-20 meters for a 100 meter transect) and the pattern you are trying to examine (i.e. if you expect rapid change then perhaps more subdivisions, if you expect slow graduate change, then perhaps fewer subdivisions). Then randomly allocate the sample plots within each subdivision of the transect (see Figure ).
-
-
-*Quadrat sampling* is a classic tool for the study of ecology, especially biodiversity. It is an important method by which organisms in a certain proportion (sample) of the habitat are counted directly. It is used to estimate population abundance (number), density, frequency and distributions. The quadrat method has been widely used in plant studies. A quadrat is a four-sided figure which delimits the boundaries of a sample plot. The term quadrat is used more widely to include circular plots and other shapes.
-
-The quadrat sampling method has the following assumptions:
-- The number of individuals in each quadrat is counted.
-- The size of the quadrats is known.
-- The quadrat samples are representative of the study area as a whole.
-
-
-The pros of quadrat sampling are:
-- It sampling is easy to use, inexpensive.
-- It is suitable for studying plants, slow-moving animals and faster-moving animals with a small range.
-- It requires the researcher to perform the work in the field and, without care.
-- It measures abundance and needed cheap equipment.
-
-Some cons are:
-- Quadrat sampling is not useful for studying very fast-moving animals which are not stay within the quadrat boundaries.
-- There exists biasness in favor of slow moving taxa.
-- Collect only taxa that are present in the sampling time and not buried too deeper in sediment.
-- It is a low estimate of taxonomic richness and assemblage composition.
-- It is also a low detectability of among-site differences in assemblage composition.
-- Some animals may experience harm if the scientist collects the population within the quadrat rather than studying it in the field.
-
-A nice summary of sampling approaches can be found in the figure below
-
-*Purposive sampling* is a non-probabilistic sampling process in which a researcher selects a specific group of individuals or units for analysis because they have characteristics that are needed in the sample. This method is appropriate when the researcher has a clear idea of the characteristics or attributes they are interested in studying and wants to select a sample representative of those characteristics. So, units are not selected by a random process, but "on purpose". 
-
-It is also known as *judgemental sampling*, and this method relies on the researcher’s judgement when identifying and selecting the individuals, cases, or sites that can provide the best information to achieve the study’s objectives.
-
-Purposive sampling is best used when you want to focus in depth on relatively small samples. Perhaps you would like to access a particular subset of the population that shares certain characteristics, or you are researching issues likely to have unique cases. It is particularly useful if you need to find information-rich cases or make the most out of limited resources.
+We can use the sample we used for the t-test example to see what happens if we used the Wilcoxon one-sample Signed-Rank test:
+ 
+-   $m_0$ = 13.5, *p-value* = 0.2729, we cannot reject the null hypothesis.
+ 
+-   $m_{01}$ = 13.4, *p-value* = 0.9082, we cannot reject the null hypothesis.
+ 
+-   $m_{02}$ = 13.6, *p-value* = 0.04383, we can reject the null hypothesis if we set the significance level at α = 0.05, but we wouldn't if α = 0.01.
 
 
 
+### Comparing the mean of two numeric variables: t-test and Wilcoxon Signed-Rank test
 
-## External Links and Resources
+To test whether two population means are the same, we are going to use the same tests we used to test one sample's mean: the t-test and the Wilcoxon Signed-Rank test. Testing that two values (the two population means) are the same, is equivalent to test that their difference equals to zero:
+$$H_0: \mu_1 - \mu_2 = 0$$, where $\mu_0$ is a numeric value.
+
+Our software of choice will do the hard work for us and we will obtain a p-value that will allow us to make a decision regarding the two population means.
+
+For the parametric test, we will have to add one assumption to those we needed in the one sample test:
+ 
+-   the difference of sample means, $\bar{x_1}-bar{x_2}$ is normally distributed. 
+ 
+-   The two populations being compared have the same variance. We can test this. there are different tests, we are going to use the *F-test*, see below, although some times a plot could be enough to understand if this assumption holds.
+ 
+-   The individual observations are independent. 
+
+The non-parametric alternative is the Wilcoxon Rank-Sum Test (also known sometimes as the Mann-Whitney U test), and is based on ranking the observations. We will only need to test the assumption of independence to perform this test.
+
+Example: are the male whales longer than female whales? The figure below shows the histogram of the sample lengths for both, male and female.
+
+
+
+```{r, out.width="80%", echo = FALSE}
+img <- readPNG("img/2Samplet-test.png")
+grid.raster(img)
+```
+
+ 
+-   $H_0: \mu_M - \mu_F = 0$ 
+ 
+-   Sample of male whales: $\bar{x_M}$ = 13.093, $s_M$ = 1.33, n=113
+ 
+-   Sample of female whales: $\bar{x_F}$ = 13.561, $s_F$ = 1.51, n=87
+ 
+-   t-test: p-value = 0.02353, we can reject the null hypothesis if we set the significance level at α = 0.05, but we wouldn't if α = 0.01.
+ 
+-   Wilcoxon test: p-value = 0.04679. In theory, we could reject the null hypothesis if we set the significance level at α = 0.05, but the p-value is very close to the α = 0.05 threshold, so we should be very cautious when rejecting the null hypothesis here.
+
+Therefore, according to the t-test, we could reject the null hypothesis that male and female whales are equally long at the significance level of α = 0.05, but we wouldn't if α = 0.01. According to the wilcoxon test we should be cautious when rejecting the null hypothesis.
+
+
+### Comparing two variances: F-test
+
+This isa test that we sill usually perform along with the two-sample t-test, to make sure that the assumption of equal variances holds. 
+
+F-test to compare two variances:
+ 
+-   $H_0: \sigma_1^2 = \sigma_2^2 = 0$ 
+
+In the example we used to perform the two-sample t-test, the figure showing the histograms of the male and female sub-samples lengths doesn't show any difference in the variability of the data for the two groups. Let's, however, perform the test:
+ 
+-   $H_0: \sigma_M^2 = \sigma_F^2 = 0$ 
+ 
+-   Sample of male whales: $s_M$ = 1.33, n=113
+ 
+-   Sample of female whales: $s_F$ = 1.51, n=87
+ 
+-   test *p-value* = 0.2022
+
+we cannot reject the null hypothesis that the two variances are equal, so in the t-test we performed above all three assumptions hold.
+
+
+### Comparing one proportion to a value or two proportions
+
+The tests to compare proportions are based in the fact that we can use the normal approximation. This is not an assumption, it is a fact, so there are no distribution assumptions to be made.
+
+Testing that one population proportion is equal to a value $p_0$, means setting the null hypothesis: $$H_0: p = p_0$$ 
+
+Testing that two population proportions are equal, means setting the null hypothesis: $$H_0: p_A = p_B$$
+Example: is the proportion of males = 50%. We use the same sample of 200 whales used to compare lengths and variances, and then perform the test:
+ 
+-   $H_0: p_M = 0.5$
+
+In the sample, there are 113 male and 87 female whales, so the proportion of males is $p_M$ = 0.565. The test p-value is *p-value* = 0.0771 so we cannot reject the null hypothesis that the proportion of whales is 0.5. 
+
+Let's compare now the proportion of male whales in two periods. Is the proportion of caught males in the period 1925-1955 the same as the proportion of caught males in 1956-1978? We are going to use the same sample of 200 whales:
+ 
+-   $H_0: p_{25-55} = p_{56-78} = 0$ 
+ 
+-   period 1925-1955: $n_{25-55}$ = 59, $p_{25-55}$ = 0.567
+ 
+-   period 1956-1978: $n_{56-78}$ = 54, $p_{56-78}$ = 0.468
+ 
+-   test *p-value* = 0.2105
+
+Therefore, we cannot reject the null hypothesis that the proportion of caught males has been the same in the two periods.
+
+
+### Comparing the mean of more than two numeric variables: ANOVA and Kruskal-Wallis test
+
+To test if *k > 2* population means are the same, we will use the ANOVA and the Kruskal-Wallis test. ANOVA is the acronym of ANalysis Of VAriance, because it compares the variability among the $k$ sample means, one per each group, with the variability within the samples.
+
+for the ANOVA, the null hypothesis to test is:
+$$H_0: \mu_A = \mu_B = \mu_C = ... = \mu_K  $$.
+
+Our software of choice will do the work and we will obtain a p-value that will allow us to make a decision regarding the whether the *k* population means are equal or at least one of them is different. 
+
+For the ANOVA, we will have the same assumptions that we had for the 2-sample t-test:
+ 
+-   the sample means, $\bar{x_i}$ are normally distributed. 
+ 
+-   The *k* populations being compared have the same variance. We can test this, however, we will usually perform the test graphically, and, therefore, we won't get any p-value out of it.
+ 
+-   The individual observations are independent. 
+
+
+Example: we want to test whether the mean length has changed over time. To do so, we are going to split the catches in the following four periods:  *1925-1929*, *1949-1954*"*, *1955-1959*"*, and *1960-1963*. The figure below shows the histogram of the sample lengths for the four periods.
+
+
+```{r, out.width="80%", echo = FALSE}
+img <- readPNG("img/Anova.png")
+grid.raster(img)
+```
+
+We are going to perform the following test:
+
+-   $H_0: \mu_A = \mu_B = \mu_C = \mu_D $, where the subscripts *A*, *B*, *C* and *D*  refer to the four periods in which we have split the data,
+ 
+-   ANOVA: p-value = $2.607x10^{-08}$, it is very small, therefore we can reject the null hypothesis  at any of the usual significant levels,  α.
+
+According to the plot, the variability of the four samples seems to be quite similar. Since the ANOVA is just a special case of linear model, we can use the tools and methods used in the analysis of linear regression models to test the assumptions for the ANOVA. In Module 4 you will discover those such techniques.
+
+*PENDING: MULTIPLE COMPARISONS*
+
+The non-parametric test alternative is the Kruskal-Wallis test. We will only need to test the assumption of independence to perform this test.
+
+ 
+-   Kruskal-Wallis test: p-value = $2.054x10^05$. Again, the p-value is very small and therefore  we can reject the null hypothesis  at any of the usual significant levels,  α.
+
+
+## p-value and sample size
+
+We have already discussed the relationship between the significance level, the p-value and the confidence interval. In Module 2 we discussed the relationship between the width of the confidence interval and the sample size. The width of the confidence interval was a function of $1/\sqrt(n)$, where *n* is the sample size. 
+
+Therefore, if there is a true difference (between 2 or *k* population means, or between the population mean and a value) we are more likely to detect it, by rejecting the null hypothesis, the larger the sample size is. At the same time, for a given sample size, the smaller the difference we want to make sure we are able to detect is, the more difficult to reject the null hypothesis will be. Last, the variability of our data also plays a role in the tests: given a sample size and a difference we want to be sure to detect, the more variable our data is the more difficult it will be to reject the null hypothesis.  
+
+[TO BE FINISHED, but you can give it a go, if you want to!!]
+
+Therefore, we can define our sample size as the one that will allow us to reject the null hypothesis if the   
+
+
+
+
+
+
+
+## External Links and Resources [TO BE UPDATED]
 
 Webster, R. and Lark, M. (2013) Field Sampling for Environmental Science and Management
 (This book provides guidance on the design and analysis of sampling method, backed by sound rationale and statistical theory. It concentrates on design-based sampling for estimates of mean values of environmental properties, emphasizing replication and randomization.) 

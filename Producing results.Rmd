@@ -166,4 +166,103 @@ ggplot(boot_mostra, aes(x=mostra_bootstrap))+
 
 ```
 
-  
+## t-test and Wilcoxon test 1 var
+```{r}
+
+sample1<-sample(Whale$length.m., 100, replace = FALSE)
+summary(sample1)
+
+mean(sample1)
+sd(sample1)
+
+t.test(sample1,alternative = "two.sided", mu = 13.5)
+t.test(sample1,alternative = "two.sided", mu = 13.5, conf.level=0.99)
+t.test(sample1,alternative = "two.sided", mu = 13.4)
+t.test(sample1,alternative = "two.sided", mu = 13.6)
+t.test(sample1,alternative = "two.sided", mu = 13.7)
+
+## wilcoxon test
+wilcox.test(sample1,alternative = "two.sided", mu = 13.5)
+wilcox.test(sample1,alternative = "two.sided", mu = 13.4)
+wilcox.test(sample1,alternative = "two.sided", mu = 13.6)
+
+t.test(sample1,alternative = "two.sided", mu = 13.7)
+
+ggplot(as.data.frame(sample1), aes(x=sample1))+
+  geom_histogram(bins=25)+
+  labs(x="Length(m)")+
+  geom_vline(xintercept = 13.5, linetype=2,colour = "red")
+```
+
+## t-test and Wilcoxon test 2 var
+```{r}
+
+sample02<- sample(seq(1:23550), 200, replace = FALSE)
+
+sample2<-Whale[sample02,]  
+
+length(sample2$length.m.[sample2$sex=="Male"])
+length(sample2$length.m.[sample2$sex=="Female"])
+
+mean(sample2$length.m.[sample2$sex=="Male"])
+mean(sample2$length.m.[sample2$sex=="Female"])
+
+sd(sample2$length.m.[sample2$sex=="Male"])
+sd(sample2$length.m.[sample2$sex=="Female"])
+
+t.test(sample2$length.m.[sample2$sex=="Male"],sample2$length.m.[sample2$sex=="Female"],alternative = "two.sided")
+
+
+wilcox.test(sample2$length.m.[sample2$sex=="Male"],sample2$length.m.[sample2$sex=="Female"],alternative = "two.sided")
+
+
+ggplot(sample2, aes(x=length.m., group = sex))+
+  geom_histogram(bins=20)+
+  labs(x="Length(m)")+
+  facet_wrap(~sex,nrow =2)
+
+```
+
+## F-test to compare 2 var
+```{r}
+var.test(sample2$length.m.[sample2$sex=="Male"],sample2$length.m.[sample2$sex=="Female"],alternative = "two.sided")
+
+
+```
+
+
+## Comparing proportions
+```{r}
+sample2$sex_cod<-ifelse(sample2$sex=="Male",1,0)
+
+prop.test(sample2$sex_cod, n=1, p=0.5)
+prop.test(113, n=200, p=0.5)
+
+sample2$period<-ifelse(sample2$Year<1956, 0,1)
+
+table(sample2$sex, sample2$period)
+
+prop.test(c(59,45), n=c(104,96))
+
+```
+
+## ANOVA
+```{r}
+sample2$period2<-ifelse(sample2$Year<1930, "1925-1929",
+                        ifelse(sample2$Year<1955, "1949-1954",
+                        ifelse(sample2$Year<1960, "1955-1959","1960-1963")))
+
+ggplot(sample2, aes(x=length.m., group = period2))+
+  geom_histogram(bins=10)+
+  labs(x="Length(m)")+
+  facet_wrap(~period2,nrow =4)
+
+model_ANOVA<-lm(length.m.~period2, data=sample2)
+summary(model_ANOVA)
+
+par(mfrow=c(2,2))
+plot(model_ANOVA)
+
+kruskal.test(length.m.~period2, data=sample2)
+```
+
