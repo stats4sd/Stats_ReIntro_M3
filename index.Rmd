@@ -583,29 +583,48 @@ grid.raster(img)
 
 We are going to perform the following test:
 
--   $H_0: \mu_A = \mu_B = \mu_C = \mu_D $, where the subscripts *A*, *B*, *C* and *D*  refer to the four periods in which we have split the data,
+-   $H_0: \mu_A = \mu_B = \mu_C = \mu_D$, where the subscripts *A*, *B*, *C* and *D*  refer to the four periods in which we have split the data,
  
--   ANOVA: p-value = $2.607x10^{-08}$, it is very small, therefore we can reject the null hypothesis  at any of the usual significant levels,  α.
+-   ANOVA: p-value = $2.607*10^{-08}$, it is very small, therefore we can reject the null hypothesis  at any of the usual significant levels,  α.
 
 According to the plot, the variability of the four samples seems to be quite similar. Since the ANOVA is just a special case of linear model, we can use the tools and methods used in the analysis of linear regression models to test the assumptions for the ANOVA. In Module 4 you will discover those such techniques.
 
-*PENDING: MULTIPLE COMPARISONS*
-
 The non-parametric test alternative is the Kruskal-Wallis test. We will only need to test the assumption of independence to perform this test.
-
  
--   Kruskal-Wallis test: p-value = $2.054x10^05$. Again, the p-value is very small and therefore  we can reject the null hypothesis  at any of the usual significant levels,  α.
+-   Kruskal-Wallis test: p-value = $2.054*10^{05}$. Again, the p-value is very small and therefore  we can reject the null hypothesis  at any of the usual significant levels,  α.
+
+
+Both tests, ANOVA and Kruskal-Wallis test the null hypothesis that all the *k* population means are equal. When we reject the null hypothesis we have evidence that not all the means are equal, but this can mean, basically, anything: *k-1* means are not different and 1 mean is different from all the others, or all *k* means are different from one each other, or anything in between. We have tests to better understand what it means to reject the null hypothesis in an ANOVA or Kruskal-Wallis tests, that involve *multiple comparisons*: comparing each mean to all the others. The number of comparisons to perform grows quite quickly with *n*: if *n=3* we need 3 mean comparisons, if *n=4* we will need 6 comparisons, and if *n=5* 10 comparisons are needed.
+
+The p-value is the probability of being wrong when rejecting the null hypothesis, and we usually set a significance level for the p-value as a threshold to reject the null hypothesis. For example, if we set α = 0.05, the probability of detecting a difference just by chance (incorrectly rejecting the null hypothesis) is 5%. However, this is valid when we perform *one single* test. When we compare groups multiple times, the probability of finding at least one difference just by chance increases depending on the number of times we perform the comparison: for *n=4* comparisons, the probability of finding at least one difference just by chance is 26.5% and this probability increases to 40.1% when *n=10*. The multiple comparison problem also applies to confidence intervals: the probability that at least one 95% confidence interval does not contain the true population value when obtaining 10 simultaneous 95% confidence intervals is 40.1%!
+
+[TO BE FINISHED}]
+
 
 
 ## p-value and sample size
 
-We have already discussed the relationship between the significance level, the p-value and the confidence interval. In Module 2 we discussed the relationship between the width of the confidence interval and the sample size. The width of the confidence interval was a function of $1/\sqrt(n)$, where *n* is the sample size. 
+We have already discussed the relationship between the significance level, the p-value and the confidence interval. In Module 2 we discussed the relationship between the width of the confidence interval and the sample size, and we saw that the width of the confidence interval is a function of $1/\sqrt(n)$, where *n* is the sample size. 
 
-Therefore, if there is a true difference (between 2 or *k* population means, or between the population mean and a value) we are more likely to detect it, by rejecting the null hypothesis, the larger the sample size is. At the same time, for a given sample size, the smaller the difference we want to make sure we are able to detect is, the more difficult to reject the null hypothesis will be. Last, the variability of our data also plays a role in the tests: given a sample size and a difference we want to be sure to detect, the more variable our data is the more difficult it will be to reject the null hypothesis.  
+Therefore, if there is a true difference (between 2 or between *k* population means, or between the population mean and a value) 
+ 
+-   we are more likely to detect the difference by rejecting the null hypothesis, the larger the sample size is. 
+ 
+-   At the same time, for a given sample size, the smaller the difference we want to make sure we are able to detect is, the more difficult to reject the null hypothesis will be. 
+ 
+-   In addition, the variability of our data also plays a role in the tests: given a sample size and a difference we want to be sure to detect, the more variable our data is the more difficult it will be to reject the null hypothesis. 
+ 
+-   Finally, if all the above are fixed, the minimum sample size depends on the sampling scheme used. It will be smallest for a Simple Random Sampling design, and will be larger for other designs, and how larger depends on the particular design used.
 
-[TO BE FINISHED, but you can give it a go, if you want to!!]
+Therefore, we can determine our sample size as the smallest one that will allow us to reject the null hypothesis given the minimum difference we would like to make sure we are able to detect. To do that we need to define this minimum difference to be detected and we need an estimate of the population measure's variance. 
 
-Therefore, we can define our sample size as the one that will allow us to reject the null hypothesis if the   
+We can also determine the minimum sample size to detect a difference in proportions. The only difference is that the minimum sample size depends on the proportion $p$, being maximal at 0.5 and decreasing as it approaches the 0 or 1 limit. Therefore, we need an initial estimate of the proportion $p$ that we want to estimate and/or test.
+
+Given all the assumptions we need to make, it can be difficult to determine the minimum sample size, and the suggestion is to use all the budget available for data collection.
+
+**[I PREFER NOT TO GO DEEPER ON THIS, AS I WOULD NEED TO INTRODUCE THE POWER OF A TEST, AND TO USE SOME FORMULAS HERE WITH t OR Z VALUES]**
+
+
 
 
 
