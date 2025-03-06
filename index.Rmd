@@ -680,6 +680,47 @@ We can also determine the minimum sample size required to detect a difference in
 Given all the assumptions we need to make, determining the minimum sample size can be difficult, and the suggestion is to use the entire available budget for data collection.
 
 
+## What p-values can and can't do
+
+we have a coin that we assume is fair. We flip it several times and observe the result: number of heads in *n* flips.
+
+The null hypothesis is that the coin is fair, $H_0: p_H = 0.5$.
+
+we flip the coin 10 times and we obtain 10 heads. This is our sample. 
+
+```{r}
+prop.test(10, n=10, p=0.5)
+```
+
+The p-value is small enough (0.004) for us to confidently reject the null hypothesis. Right? well, maybe wrong!
+
+Now let's carry out the experiment in a slightly different way: 1024 people are given a fair coin, and they flip it. Those that get heads remain, those that get tails, leave the room. We expect about 50% staying and 50% leaving, about 512. Then we repeat the process a second time, and a third, and a fort, up to a tenth time. We expect one person to still be in the room at the end of this process. 
+
+As you can see with the example, the p-value sometimes can be misleading. and it is not just that it's definition is a bit convoluted. Even assuming that we agree with the definition, if you run enough experiment you can always get a p-value that demonstrates what you wanted to demonstrate, just by random chance.
+
+There are criticisms about the use of p-value, there is a whole approach to statistics, the Bayesian approach, that plainly rejects them. In 2016, the American Statistical Association managed to get a group of statisticians to agree on six principles about p-values:
+
+1. P-values can indicate how compatible the data are with a specific statistical model
+
+p-values do this by essentially measuring how surprising the data are, given the null hypothesis.
+
+2. P-values do not measure the probability that the null hypothesis is true
+
+We have discussed this before.
+
+3. Scientific conclusions and decisions should not be based only on whether a p-value passes a specific threshold
+
+The significance levels threshold are, as we have seen, arbitrary. A *significant* result does not necessarily mean that we have proven discovery.
+
+4. Proper inference requires full reporting and transparency
+
+In the example, we have seen that if you repeat the experiment enough times, you will end up with a significant result, even if the null hypothesis is true. We should report our sampling scheme, make data available, describe the methods used so others can replicate our experiment.
+
+5. A p-value does not measure the size of an effect or the importance of a result
+
+A significant result tells us that the observed difference is unlikely to be due to random chance, but desn't tell us anything about how large or small this difference is.
+
+6. By itself, a p-value does not provide a good measure of evidence regarding a model or  hypothesis. i.e. p-value close to 0.05 offers only weak evidence against the null hypothesis 
 
 
 ## External Links and Resources 
