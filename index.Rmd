@@ -82,6 +82,11 @@ In this session, we will cover:
 
 -   Some basic statistical tests that use the hypothesis testing method.
 
+In the video I go through the process of hypothesis testing, with the use of examples and avoiding formulae. 
+
+![](https://https://youtu.be/Tmoy9quitUM)
+
+
 In these workbooks, all output produced will come from the use of R, and all of the code used in the workbooks can be found on GitHub here: https://github.com/stats4sd/Stats_ReIntro_M3. However, the principles are identical regardless of which data analysis tool is being used. 
 
 Whichever tool is being used for data analysis, the user must be familiar enough with it to be able to generate any sort of summary, plot, or transformation that they might suddenly think could be useful!
