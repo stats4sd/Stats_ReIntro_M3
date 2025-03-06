@@ -23,6 +23,7 @@ library(png)
 library(jpeg)
 library(grid)
 library(cowplot)
+library(emmeans)
 
 Whale<-read.csv("Data/Humpback.csv") %>% filter(length.m.>0) %>% filter(Year>=1949 & Year <=1965)
 Whale$sex<-factor(Whale$sex, levels = c("Male", "Female", "Hermaphrodite", "Unknown"))
@@ -61,31 +62,33 @@ Whale %>%
 
 ## Introduction
 
-In this third workbook, we are going to be taking a closer look at hypothesis testing.
+In this third workbook, we are going to take a closer look at hypothesis testing.
  
-Hypothesis testing is the process that allows us to answer questions about our data, our population and our models. It is a well defined process that is performed always in the same way, although the calculations and the data involved will differ depending on the test performed or the question to be answered. It is related to and can used along some of the results we learned in Module 2, especially the concept of precision measures such as the confidence interval. And we will use the method of hypothesis testing in Module 4 and 5 when we will discuss model fitting.
+Hypothesis testing is the process that allows us to answer questions about our data, our population, and our models. It is a well-defined process that is always performed in the same way, although the calculations and the data involved will differ depending on the test performed or the question being answered. It is related to, and can be used alongside, some of the results we learned in Module 2, especially the concept of precision measures such as the confidence interval. We will also use the method of hypothesis testing in Modules 4 and 5, when we discuss model fitting.
 
-This is a basic topic in statistics, because it lays the foundations of the *statistical inference*, the process that allows us to make statements and answer questions about a population with incomplete information — we only have the data contained in the sample. 
+This is a basic topic in statistics, because it lays the foundation of *statistical inference*, the process that allows us to make statements and answer questions about a population with incomplete information, as we only have the data contained in the sample.
 
-The experience tells us that this is one of the hardest topics to learn. We’ll try to avoid all the mathematical apparatus around it, and concentrate in a few important concepts and in the process to test statistical hypothesis.
+Experience tells us that this is one of the hardest topics to learn too. We’ll try to avoid all the mathematical apparatus surrounding it and concentrate on a few important concepts and on the process of testing statistical hypotheses.
 
 In this session, we will cover:
 
--   What is a statistical hypothesis and the concept of the null hypothesis.
+-   What a statistical hypothesis is, and the concept of the null hypothesis.
 
--   The concept of p-value, whether to use one side or two sides of the sampling distribution to compute it, and how it is related to the confidence interval seen in Module 2.
+-   The concept of the p-value, whether to use one side or two sides of the sampling distribution to compute it, and how it relates to the confidence interval covered in Module 2.
 
--   What is the statistical significance, α.
+-   What statistical significance, α, is.
 
--   The process of testing hypothesis. 
+-   The process of hypothesis testing. 
 
 -   Some basic statistical tests that use the hypothesis testing method.
 
-In these workbooks all output produced will come from the use of R, and all of the code used in the workbooks can be found on GitHub here: https://github.com/stats4sd/Stats_ReIntro_M3. But the principles are identical regardless of which data analysis tool is being used. Whichever tool is being used for data analysis - it will require that the user is familiar enough with it to be able to generate any sort of summary or plot or transformation that they might suddenly think could be useful!
+In these workbooks, all output produced will come from the use of R, and all of the code used in the workbooks can be found on GitHub here: https://github.com/stats4sd/Stats_ReIntro_M3. However, the principles are identical regardless of which data analysis tool is being used. 
+
+Whichever tool is being used for data analysis, the user must be familiar enough with it to be able to generate any sort of summary, plot, or transformation that they might suddenly think could be useful!
 
 
 ## Data being used in this workbook
-In this session we are going to use a public dataset produced by the Ocean Biodiversity Information system (OBIS). It contains the Historic whale catch records from Australian whaling stations (1925-1978). The full data set and other details can be found here <https://obis.org/dataset/43e4c2cc-5886-427f-a4a9-d47d2635d246>. It contains 38267 records, but we will use a subset: the data corresponding to the most common caught whale, the Humpback (Megaptera novaeangliae) in the years 1949 to 1962. 
+In this session we are going to use a public dataset produced by the Ocean Biodiversity Information system (OBIS). It contains the Historic whale catch records from Australian whaling stations (1925-1978). The full data set and other details can be found here <https://obis.org/dataset/43e4c2cc-5886-427f-a4a9-d47d2635d246>. It contains 38,267 records, but we will use a subset: the data corresponding to the most common caught whale, the Humpback (Megaptera novaeangliae) in the years 1949 to 1962. 
 
 We have also edited it to contain only the columns we are interested in. Below you can explore the the data we are going to use in this workbook.
 
@@ -97,9 +100,9 @@ DT::datatable(Whale)
 
 **Question**: What is the proportion of males among humpback whales? 
 
-Without knowing too much about whales, the obvious answer might be to guess that it would be 50%. Actually within our dataset there was one labelled as a hermaphrodite, not enough to make much of a difference to the % - but we will consider the variable of interest here as "the % of whales which are male", for the sake of creating an easier to analyse binary variable.
+Without knowing too much about whales, the obvious answer might be to guess that it is 50%. In fact, within our dataset, there was one whale labelled as a hermaphrodite— not enough to make much of a difference to the percentage — but we will consider the variable of interest here as **the percentage of whales which are male**, for the sake of creating an easier-to-analyse binary variable.
 
-But let's have a look at the data to see the results. The figure below shows the percentage over the period 1949-1962. Within each year there were we find at least 56% of the whales were male, with the figure as high as 80% in 1951.
+But let’s have a look at the data to see the results. The figure below shows the percentage over the period 1949–1962. In each year, we find that at least 56% of the whales were male, with the figure as high as 80% in 1951.
 
 
 ```{r fig1, out.width="80%", echo = FALSE}
@@ -123,26 +126,29 @@ male_year<-Whale %>%
   ggplotly()
 ```
 
-If there were no difference in the underlying proportions of male and female whales, then each year there would be a 50:50 chance of having more male than female catches, or more female than male catches - just like flipping a coin. 
+If there were no difference in the underlying proportions of male and female whales, then each year there would be a 50:50 chance of having more male than female catches, or more female than male catches – just like flipping a coin.
 
-However, in this data we see that every year we have observed more male than female. If it were indeed a 50:50 gender ratio then this would be like flipping a fair coin 14 times in a row and getting heads every time. The probability of this happening is 0.5 raised to the power 14, which is a very small number: 0.0000610.
+However, in this dataset, we see that every year we have observed more males than females. If the gender ratio were indeed 50:50, this would be like flipping a fair coin 14 times in a row and getting heads every time. The probability of this happening is 0.5 raised to the power of 14, which is a very small number: 0.0000610.
 
 If we observed this in a coin-flipping experiment, we could confidently claim that the coin was not fair.
 
-So, we can ask ourselves whether the true proportion of males among the humpback whales can really be 50%? The process we follow to answer a question like this is called *hypothesis testing*.
+So, we can ask ourselves whether the true proportion of males among humpback whales can really be 50%. The process we follow to answer a question like this is called *hypothesis testing*.
 
-We can define a hypothesis as a proposed explanation for a phenomenon. It is not the absolute truth, but rather a provisional, working assumption. Within a hypothesis test we look at the evidence against that hypothesis, by comparing how consistent our data is with that hypothesis. 
+We can define a hypothesis as a proposed explanation for a phenomenon. It is not the absolute truth, but rather a provisional, working assumption. In a hypothesis test, we look at the evidence against that hypothesis by comparing how consistent our data are with the hypothesis.
 
 
-## The Null Hypothesis
 
-The *null hypothesis* ($H_0$) is the 'default' hypothesis that we work with until we have sufficient evidence against it, and it generally is used as a hypothesis to indicated that 'nothing' is happening, i.e. there are no trends or no differences between groups or the value of interest is equal to 0. Hence the word "null". In the example of the whales, we could state the null hypothesis as:
+## The Null and Alternative Hypothesis
+
+The *null hypothesis* ($H_0$) is the 'default' hypothesis that we work with until we have sufficient evidence against it. It is generally used as a hypothesis to indicate that ‘nothing’ is happening, i.e. there are no trends, no differences between groups, or the value of interest is equal to 0. Hence the word “null”.
+
+In the example of the whales, we could state the null hypothesis as:
 
 -   The proportion of male whales is 50% ($H_0: p_M = 0.5$) or
 
 -   The proportion of male whales is equal to the proportion of female whales ($H_0: p_M = p_F$)
 
-The null hypothesis is what we are willing to assume is the case, until proven otherwise. It is extremely conservative, denying any progress or change! However, this does not mean that we believe the null hypothesis is literally true; we are never looking to claim that the null hypothesis has actually been proved; instead we are only ever looking for evidence *against* the null hypothesis. 
+The null hypothesis is what we are willing to assume is the case until proven otherwise. It is extremely conservative, denying any progress or change! However, this does not mean that we believe the null hypothesis is literally true; we are never seeking to claim that the null hypothesis has actually been proved. Instead, we are only ever looking for evidence *against* the null hypothesis. 
 
 In the words of Ronald Fisher, the father of modern statistics:
 
@@ -150,20 +156,20 @@ In the words of Ronald Fisher, the father of modern statistics:
 
 *(R.A. Fisher (1935), The Design of Experiments. Oliver and Boyd, p.19).*
 
-There is a strong analogy with criminal trials in the English – and indeed many other – legal systems: a defendant can be found guilty, but nobody is ever found innocent, simply not proven guilty. Similarly, we may find that we reject the null hypothesis, but if we don't have enough evidence to do so, it doesn't mean that we can accept it as truth. It is just a working assumption until something better comes along.  
+There is a strong analogy with criminal trials in the English – and indeed many other – legal systems: a defendant can be found guilty, but nobody is ever found innocent, only not proven guilty. Similarly, we may find that we reject the null hypothesis, but if we don’t have enough evidence to do so, it doesn’t mean that we can accept it as the truth. It is simply a working assumption until something better comes along.
 
 
-### The alternative hypothesis
+### The Alternative hypothesis
 
-The alternative hypothesis ($H_1$) is the statement that is being tested against the null hypothesis. It claims that there is an effect in the population that is caused by a non-random cause. *When we have enough evidence to against the null hypothesis, we reject it, and we accept the alternative being true.*
+The alternative hypothesis ($H_1$) is the statement that is tested against the null hypothesis. It claims that there is an effect in the population that is caused by a non-random cause. *When we have enough evidence against the null hypothesis, we reject it, and we accept the alternative being true.*
 
-Often, the alternative hypothesis is the same as the research hypothesis. In other words, it’s the claim that you expect or hope will be true.
+Often, the alternative hypothesis is the same as the research hypothesis. In other words, it is the claim that you expect or hope will be true.
 
-The alternative hypothesis is the complement to the null hypothesis. Null and alternative hypotheses are exhaustive, meaning that together they cover every possible outcome. They are also mutually exclusive, meaning that only one can be true at a time.
+The alternative hypothesis is the complement of the null hypothesis. Null and alternative hypotheses are exhaustive, meaning that together they cover every possible outcome. They are also mutually exclusive, meaning that only one can be true at a time.
 
-Alternative hypotheses often include phrases such as “an effect”, “a difference”, or “a relationship”. When alternative hypotheses are written in mathematical terms, they always include an inequality (usually ≠, but sometimes > or <). As with null hypotheses, there are many acceptable ways to phrase an alternative hypothesis.
+Alternative hypotheses often include phrases such as “an effect”, “a difference”, or “a relationship”. When alternative hypotheses are written in mathematical terms, they always include an inequality (usually ≠, but sometimes > or <). As with the null hypotheses, there are many acceptable ways to phrase an alternative hypothesis.
 
-In the example of the whales, we could state the null hypothesis as: the proportion of male whales is 50%, or the proportion of male whales is equal to the proportion of female whales. The alternative hypothesis, then, will be one of the three following options:  
+In the example of the whales, we could state the null hypothesis as: the proportion of male whales is 50%, or the proportion of male whales is equal to the proportion of female whales. The alternative hypothesis, then, will be one of the following three options:
 
 -    $H_1: p_M \ne 0.5$ or $H_1: p_M \ne p_F$
 
@@ -187,13 +193,13 @@ Whale %>%
   gt()
 ```
 
-We observed 720 whales in this year, of which 409, 56.8%, were male. 
+We observed 720 whales in this year, of which 409 (56.8%) were male.
 
-This feels like quite a large difference - but a crucial question is whether this difference is large enough to provide evidence against the null hypothesis, or whether we might expect to sometimes see such a difference purely based on chance. 
+This feels like quite a large difference – but the crucial question is whether this difference is large enough to provide evidence against the null hypothesis, or whether we might expect to see such a difference purely by chance from time to time.
 
-If our null hypothesis were true then the probability of any randomly observed whale being male would be 50%, the same as obtaining heads when tossing a coin. But across 720 coin flips we wouldn't expect to always observe exactly 50% heads and 50% tails - sometimes there would be more and sometimes less.
+If our null hypothesis were true, then the probability of any randomly observed whale being male would be 50%, the same as obtaining heads when tossing a coin. However, across 720 coin flips, we wouldn’t expect to observe exactly 50% heads and 50% tails every time — sometimes there would be more, and sometimes less.
 
-We could run a simulation of 10,000 experiments where we did 720 coin flips to get an idea of the distribution of how much variability around 50% we would expect to see occurring purely by chance.
+We could run a simulation of 10,000 experiments, each consisting of 720 coin flips, to get an idea of the distribution and how much variability around 50% we would expect to see occurring purely by chance.
 
 
 ```{r fig2, out.width="80%", echo = FALSE}
@@ -213,15 +219,15 @@ table(heads>=409)
 
 ```
 
-Out of the 10,000 simulations, assuming equal proportions of males and females, we saw an outcome 409 or more 'males' only 4 times. 
+Out of the 10,000 simulations, assuming equal proportions of males and females, we saw an outcome of 409 or more males only 4 times.
 
-So, is it possible that, if the true probability of male and female whales is equal (0.5), we could observed 409 males in a random sample of 720 whales? The answer is YES, it is possible, although very unlikely - in this simulation it happened just 0.04% of the time.
+So, is it possible that, if the true probability of male and female whales is equal (0.5), we could observe 409 males in a random sample of 720 whales? The answer is YES, it is possible, although very unlikely — in this simulation, it happened just 0.04% of the time.
 
-Instead of running a simulation of 10,000 runs, we could have systematically worked through all the possible permutations of the sample and calculated a theoretical probability under the null hypothesis. Each of these would generate an observed proportion of male whales, and plotting these would produce a smoother distribution than just using 10,000 simulations. Unfortunately, the number of permutations is so high that it cannot be obtained with current means within a person's lifetime.
+Instead of running a simulation of 10,000 runs, we could have systematically worked through all the possible permutations of the sample and calculated a theoretical probability under the null hypothesis. Each of these would generate an observed proportion of male whales, and plotting these would produce a smoother distribution than just using 10,000 simulations. Unfortunately, the number of permutations is so high that it cannot be calculated with current means within a person’s lifetime.
 
-Fortunately, though, we don’t have to perform these calculations, since the probability distribution for the proportions under the null hypothesis is based on the binomial distribution. From this we can determine the probability of a number of successes out of n trials for a given probability of success — 0.5 in our case.
+Fortunately, though, we don’t have to perform these calculations, since the probability distribution for the proportions under the null hypothesis is based on the binomial distribution. From this, we can determine the probability of a number of successes out of *n* trials for a given probability of success — 0.5 in our case.
 
-The figure below shows the probability density function (A) and the cumulative probability distribution function (B). In both cases, the value 409 is highlighted with a vertical line, to show how likely it is to obtain 409 successes or more in 720 trials where the probability of success is 0.5. This probability is 0.00011, or 0.011%.
+The figure below shows the probability density function (A) and the cumulative probability distribution function (B). In both cases, the value 409 is highlighted with a vertical line to show how likely it is to obtain 409 successes or more in 720 trials, where the probability of success is 0.5. This probability is 0.00011, or 0.011%.
      
 
 ```{r fig3, out.width="80%", echo = FALSE}
@@ -252,17 +258,19 @@ pl3
 plot_grid(pl2, pl3, labels = c('A', 'B'), label_size = 12)
 ```
 
-This probability is the so-called *p-value*, one of the most prominent concepts in statistics as practised today. A more formal definition of *p-value* is *a p-value is the probability of obtaining a result at least as extreme as the one we observed assuming the null hypothesis is really true*. As this p-value starts to decrease the strength of evidence against the null hypothesis starts to increase - it is starting to seem like our observations are not compatible with our null hypothesis.
+This probability is the so-called *p-value*, one of the most prominent concepts in statistics as practised today. A formal definition of *p-value* is: *a p-value is the probability of obtaining a result at least as extreme as the one we observed assuming the null hypothesis is really true*. As this p-value decreases the strength of evidence against the null hypothesis increases - it starts to seem as though our observations are not compatible with the null hypothesis.
+
+A less formal definition of the p-value is: *a p-value is the probability of being wrong when rejecting the null hypothesis to accept the alternative*. 
 
 
 ## One-sided or two-sided test
 
-The p-value is the probability of obtaining a result at least as extreme as the observed result if the null hypothesis were really true. What do we mean by *extreme*? 
+The p-value is the probability of obtaining a result at least as extreme as the observed result if the null hypothesis were really true. But what do we mean by *extreme*? 
 
-The p-value we obtained, 0.011% is *one-tailed*, corresponding to what we know as *one-sided test*, the test that uses as alternative hypothesis $H_1: p_M \gt 0.5$. Because we are only considering only how likely is that we have observed such an extreme value (56.8%) where males were more common than females. 
+The p-value we obtained, 0.011% is *one-tailed*, corresponding to what we know as *one-sided test*, the test that uses as alternative hypothesis $H_1: p_M \gt 0.5$. This is because we are only considering how likely it is that we have observed such an extreme value (56.8%), where males were more common than females.
 
-However, if we had observed the reverse - and our data contained whales of which 56.8% were female, then it would also have made us suspect that the null hypothesis does not hold. Therefore, we should also calculate the probability of observing 56.8% or more of either male or female whales. This is what is known as the *two-tailed* p-value that corresponds to the *two-sided test*. This test uses as alternative hypothesis $H_1: p_M \ne 0.5$.
-This two-tail probability is double the one-tailed probability, 0.021% or 0.0022, since the binomial distribution is perfectly symmetrical as we saw in the previous section.
+However, if we had observed the reverse – and our data contained whales of which 56.8% were female – then this would also have led us to suspect that the null hypothesis does not hold. Therefore, we should also calculate the probability of observing 56.8% or more of either male or female whales. This is known as the *two-tailed* p-value, which corresponds to the *two-sided test*. This test uses as alternative hypothesis $H_1: p_M \ne 0.5$.
+This two-tailed probability is double the one-tailed probability, 0.021% or 0.00021, since the binomial distribution is perfectly symmetrical, as we saw in the previous section.
 
 
 ```{r, out.width="80%", echo = FALSE}
@@ -286,57 +294,61 @@ In our example of the proportion of male and female whales, we had the following
 
 -   We observed the sex and *measured the proportion of male whales in the sample: 56.8%*.
 
--   We obtained the *p-value = 0.00022*: the probability of obtaining a value as extreme as this if the null hypothesis is true. This is the *two-sided test*.
+-   We obtained the *p-value = 0.00022*, which is the probability of obtaining a value as extreme as this if the null hypothesis is true. This is the *two-sided test*.
 
-While there is a very small chance that we could have obtained this percentage if the null hypothesis was really true, it seems very unlikely. So the question is know whether we think the *p-value* is small enough for us to be able to consider that the difference is *statistically significant*, and, therefore, the alternative hypothesis true.
+While there is a very small chance that we could have obtained this percentage if the null hypothesis were really true, it seems very unlikely. So, the question now is whether we think the *p-value* is small enough for us to consider that the difference is *statistically significant*, and, therefore, the alternative hypothesis to be true.
 
-In other words, whether the difference in our estimate the difference between the population value (the proportion of males) and the null hypothesis is *not equal to zero*. 
+In other words, we are asking whether the difference between our estimate and the population value (the proportion of males) under the null hypothesis is *not equal to zero*. 
 
-It seems extremely plausible that the difference between the proportion of males observed in the sample and the null hypothesis value cannot be explained by random variation alone. It therefore must have occurred because the population value *is not equal to the null hypothesis*, and the sample data provides the evidence for this. 
+It seems extremely plausible that the difference between the proportion of males observed in the sample and the null hypothesis value cannot be explained by random variation alone. It therefore must have occurred because the population value *is not equal to the null hypothesis*, and the sample data provides evidence for this.
 
-Since we have incomplete information about the population — we only have the sample — we can always be wrong when making statements like like the following: *"the proportion of male whales is significantly different from 0.5"*. However, we control the risk of being wrong when rejecting the null hypothesis through the p-value. 
+Since we have incomplete information about the population — we only have the sample — we can always be wrong when making statements like the following:  *"the proportion of male whales is significantly different from 0.5"*. However, we control the risk of being wrong when rejecting the null hypothesis through the p-value.
 
 
-Using the analogy of criminal trials in the English legal system, the sample data provide the evidence against the innocence of the defendant, and p-value is the probability of being wrong if the defendant is declared guilty. Even if we had observed 720 male whales there will still be a small (extremely small!) probability of that happening where the proportion of males was genuinely 50%.
+Using the analogy of criminal trials in the English legal system, the sample data provide the evidence against the innocence of the defendant, and the p-value is the probability of being wrong if the defendant is declared guilty. Even if we had observed 720 male whales, there would still be a small (extremely small!) probability of that happening if the proportion of males were genuinely 50%.
 
-So we need to define a *significance level*, denoted by α, which is the critical threshold value for the p-value below which we deem that we have sufficient evidence in our case against the null hypothesis. Therefore: 
+So, we need to define a *significance level*, denoted by α, which is the critical threshold value for the p-value, below which we deem that we have sufficient evidence in our case against the null hypothesis. 
+
+Therefore: 
 
 -   if the p-value ≤ α, the result is statistically significant, and we reject the null hypothesis
  
 -   if the p-value > α, the result is not statistically significant, and we cannot reject the null hypothesis
 
-The most commonly used significance level (α) is 0.05 or 5%, but in some fields a level of 0.1 (10%) or 0.01 (1%) is more conventional, and there is a strong movement in favour of setting the threshold at 0.005 (https://www.nature.com/articles/s41562-017-0189-z). Therefore, some hypothetical results may be significant at one threshold but not at an other.
+The most commonly used significance level (α) is 0.05 or 5%, but in some fields, a level of 0.1 (10%) or 0.01 (1%) is more conventional, and there is a strong movement in favour of setting the threshold at 0.005 (https://www.nature.com/articles/s41562-017-0189-z). Therefore, some hypothetical results may be significant at one threshold but not at another.
 
-However, we must acknowledge that this threshold is arbitrary. For example, if we use α = 0.05, a p-value of 0.0499 is essentially not different from a p-value of 0.0501, but we would make a completely different decision if we strictly followed the significance level rule. P-values well above or well below α lead us to a straightforward decision, whereas p-values close to α usually lead to an inconclusive decision.
+However, we must acknowledge that this threshold is arbitrary. For example, if we use α = 0.05, a p-value of 0.0499 is essentially no different from a p-value of 0.0501, but we would make a completely different decision if we strictly followed the significance level rule. P-values well above or well below α lead us to a straightforward decision, whereas p-values close to α usually lead to an inconclusive decision.
 
 
 
 ## Hypothesis testing
 
-There are a large number of different 'hypothesis tests' (see the section on *Statistical tests*), each of which allows us to address a slightly different set of hypothesis. But the general process in all of them follows the same steps: 
+There are a large number of different 'hypothesis tests' (see the section on *Statistical tests*), each of which allows us to address a slightly different set of hypotheses. However, the general process in all of them follows the same steps:
 
-1-  Set up a question in terms of a null hypothesis and alternative hypothesis that we want to check. We usually use the notation $H_0$ for the null hypothesis and $H_1$ for the alternative hypothesis. 
+1-Set up a question in terms of a null hypothesis and an alternative hypothesis that we want to test. We usually use the notation H₀ for the null hypothesis and H₁ for the alternative hypothesis.
 
-2-  Choose a test statistic that estimates something that, if it turns out to be extreme enough, would lead us to doubt the null hypothesis. You will not actually have to find this statistic, as each (standard) statistical test has already defined this test statistic.  
+2- Choose a test statistic that estimates something which, if it turns out to be extreme enough, would lead us to doubt the null hypothesis. You will not actually have to calculate this statistic yourself, as each (standard) statistical test has already defined the relevant test statistic.
 
-3-  Generate the sampling distribution of this test statistic, if the null hypothesis was true. 
+3- Generate the sampling distribution of this test statistic, assuming the null hypothesis is true.
 
-4-  Obtain the p-value comparing your tests statistic with the sampling distribution. The p-value is the probability of observing such an extreme statistic if the null hypothesis is true. We have to decide if we are going to use the one-sided or two-sided p-value. In most of the tests, we will use the two-sided p-value. 
+4- Obtain the p-value by comparing your test statistic with the sampling distribution. The p-value is the probability of observing such an extreme statistic if the null hypothesis is true. When setting up the alternative hypothesis we decided whether to use a one-sided or two-sided p-value. In most tests, we will use the two-sided p-value.
 
-5-  Declare the result is significant if the p-value is below some critical threshold α.
+5- Declare the result significant if the p-value is below some critical threshold, α.
 
-There is a good chance if you have been taught statistics at school or undergraduate level you may have had to calculate many of these steps by hand, and been asked to consult long tables of numbers containing test statistics and critical thresholds. 
+There is a good chance that if you have been taught statistics at school or undergraduate level, you may have had to calculate many of these steps by hand and been asked to consult long tables of numbers containing test statistics and critical thresholds.
 
-Thankfully this process has been obsolete for at least 50 years at this point (even if it is still regularly taught to students!), as we now have computers to do this for us.
+Thankfully, this process has been obsolete for at least 50 years (even if it is still regularly taught to students!), as we now have computers to do this for us. The "only" thing the researcher has to do is points 1 and 6 above, those that require making decisions.
 
-It is important to emphasise that the exact p-value is conditional not only on the truth of the null hypothesis, but also on all other assumptions underlying the statistical model, such as lack of systematic bias, independence of the observations, the distribution of the variables. We'll discuss some of these assumptions later.
+It is important to emphasise that the exact p-value is conditional not only on the truth of the null hypothesis, but also on all other assumptions underlying the statistical model, such as the absence of systematic bias, the independence of the observations, and the distribution of the variables. We’ll discuss some of these assumptions later.
 
 
 ### Confidence Interval for hypothesis testing
 
-Although the confidence interval is a tool for estimation, we can use it also for hypothesis testing. Instead of generating the sampling distribution under the null hypothesis for the tests statistic and comparing the tests statistic with this sampling distribution to obtain the p-value (steps 3 & 4 in the hypothesis testing process above), we generate the confidence interval and observe whether the null hypothesis value lies within its limits or outside them. Then, if the null hypothesis value lies within the confidence interval limits, we can't reject it, the results are not significant, whereas if the value lies outside the confidence interval limits, the result is significant and there is sufficient evidence to reject the null hypothesis.
+Although the confidence interval is a tool for estimation, we can also use it for hypothesis testing or to support it. Instead of generating the sampling distribution under the null hypothesis for the test statistic and comparing the test statistic with this distribution to obtain the p-value (steps 3 and 4 in the hypothesis testing process above), we can generate the confidence interval for the statistic, and observe whether the null hypothesis value lies within its limits or outside them.
 
-Using a confidence level of 95% and a significance level of 5% will lead to the same results, because they are complementary. And the same happens for a confidence level of 99% and a significance level of 1%. If a 99% confidence interval does not include the null hypothesis, then we can reject it with a p-value < 0.01.
+If the null hypothesis value lies within the confidence interval limits, we cannot reject it and the results are not significant. Conversely, if the value lies outside the confidence interval limits, the result is significant and there is sufficient evidence to reject the null hypothesis.
+
+Using a confidence level of 95% and a significance level of 5% will lead to the same results, because they are complementary. The same applies to a confidence level of 99% and a significance level of 1%. If a 99% confidence interval does not include the null hypothesis, then we can reject it with a p-value of less than 0.01.
 
 ADD SOME SORT OF PLOT HERE TO ILLUSTRATE?
 
@@ -599,19 +611,25 @@ For the ANOVA, we will have the same assumptions that we had for the 2-sample t-
 -   The individual observations are independent. 
 
 
-Example: we want to test whether the mean length has changed over time. To do so, we are going to split the catches in the following four periods:  *1925-1929*, *1949-1954*"*, *1955-1959*"*, and *1960-1963*. The figure below shows the histogram of the sample lengths for the four periods.
+Example: we want to test whether the mean length has changed over time. To do so, we are going to split the catches in the following four periods: *1949-1954*"*, *1955-1959*"*, and *1960-1963*. The figure below shows the histogram of the sample lengths for the four periods.
 
 
-```{r, out.width="80%", echo = FALSE}
-img <- readPNG("img/Anova.png")
-grid.raster(img)
+```{r}
+Whale$period2<-ifelse(Whale$Year<1955, "1949-1954",
+                        ifelse(Whale$Year<1960, "1955-1959","1960-1963"))
+
+ggplot(Whale, aes(x=length.m., group = period2))+
+  geom_histogram(bins=10)+
+  labs(x="Length(m)")+
+  facet_wrap(~period2,nrow =3)
+
 ```
 
 We are going to perform the following test:
 
 -   $H_0: \mu_A = \mu_B = \mu_C = \mu_D$, where the subscripts *A*, *B*, *C* and *D*  refer to the four periods in which we have split the data,
  
--   ANOVA: p-value = $2.607*10^{-08}$, it is very small, therefore we can reject the null hypothesis  at any of the usual significant levels,  α.
+-   ANOVA: p-value = $2.2*10^{-16}$, it is very small, therefore we can reject the null hypothesis  at any of the usual significant levels,  α.
 
 According to the plot, the variability of the four samples seems to be quite similar. Since the ANOVA is just a special case of linear model, we can use the tools and methods used in the analysis of linear regression models to test the assumptions for the ANOVA. In Module 4 you will discover those such techniques.
 
@@ -624,47 +642,50 @@ Both tests, ANOVA and Kruskal-Wallis test the null hypothesis that all the *k* p
 
 The p-value is the probability of being wrong when rejecting the null hypothesis, and we usually set a significance level for the p-value as a threshold to reject the null hypothesis. For example, if we set α = 0.05, the probability of detecting a difference just by chance (incorrectly rejecting the null hypothesis) is 5%. However, this is valid when we perform *one single* test. When we compare groups multiple times, the probability of finding at least one difference just by chance increases depending on the number of times we perform the comparison: for *n=4* comparisons, the probability of finding at least one difference just by chance is 26.5% and this probability increases to 40.1% when *n=10*. The multiple comparison problem also applies to confidence intervals: the probability that at least one 95% confidence interval does not contain the true population value when obtaining 10 simultaneous 95% confidence intervals is 40.1%!
 
+
+```{r}
+model_ANOVA<-lm(length.m.~period2, data=Whale)
+anova(model_ANOVA)
+
+emmeans(model_ANOVA,~period2)
+```
+
 [TO BE FINISHED}]
 
 
 
 ## p-value and sample size
 
-We have already discussed the relationship between the significance level, the p-value and the confidence interval. In Module 2 we discussed the relationship between the width of the confidence interval and the sample size, and we saw that the width of the confidence interval is a function of $1/\sqrt(n)$, where *n* is the sample size. 
+We have already discussed the relationship between the significance level, the p-value, and the confidence interval. In Module 2, we discussed the relationship between the width of the confidence interval and the sample size, and we saw that the width of the confidence interval is a function of $1/\sqrt(n)$, where *n* is the sample size. 
 
-Therefore, if there is a true difference (between 2 or between *k* population means, or between the population mean and a value) 
+Therefore, if there is a true difference (whether between two population means, between *k* population means, or between the population mean and a specific value)...
  
--   we are more likely to detect the difference by rejecting the null hypothesis, the larger the sample size is. 
+-   We are more likely to detect a difference by rejecting the null hypothesis the larger the sample size is 
  
--   At the same time, for a given sample size, the smaller the difference we want to make sure we are able to detect is, the more difficult to reject the null hypothesis will be. 
+-   At the same time, for a given sample size, the smaller the difference we want to be able to detect, the more difficult it will be to reject the null hypothesis. 
  
--   In addition, the variability of our data also plays a role in the tests: given a sample size and a difference we want to be sure to detect, the more variable our data is the more difficult it will be to reject the null hypothesis. 
+-   In addition, the variability of our data also plays a role in the tests: given a sample size and a difference we want to be able to detect, the larger the variability of our data is, the more difficult it will be to reject the null hypothesis. 
  
--   Finally, if all the above are fixed, the minimum sample size depends on the sampling scheme used. It will be smallest for a Simple Random Sampling design, and will be larger for other designs, and how larger depends on the particular design used.
+-   Finally, if all of the above are fixed, the minimum sample size depends on the sampling scheme used. It will be smallest for a simple random sampling design and larger for other designs, with how much larger depending on the particular design used.
 
-Therefore, we can determine our sample size as the smallest one that will allow us to reject the null hypothesis given the minimum difference we would like to make sure we are able to detect. To do that we need to define this minimum difference to be detected and we need an estimate of the population measure's variance. 
+Therefore, we can determine our sample size as the smallest one that will allow us to reject the null hypothesis, given the minimum difference we would like to be able to detect. To do this, we need to define this minimum detectable difference and obtain an estimate of the population measure’s variance.
 
-We can also determine the minimum sample size to detect a difference in proportions. The only difference is that the minimum sample size depends on the proportion $p$, being maximal at 0.5 and decreasing as it approaches the 0 or 1 limit. Therefore, we need an initial estimate of the proportion $p$ that we want to estimate and/or test.
+We can also determine the minimum sample size required to detect a difference in proportions. The only difference is that the minimum sample size depends on the proportion $p$, being maximal at 0.5 and decreasing as it approaches the limits of 0 or 1. Therefore, we need an initial estimate of the proportion $p$ that we want to estimate and/or test.
 
-Given all the assumptions we need to make, it can be difficult to determine the minimum sample size, and the suggestion is to use all the budget available for data collection.
-
-**[I PREFER NOT TO GO DEEPER ON THIS, AS I WOULD NEED TO INTRODUCE THE POWER OF A TEST, AND TO USE SOME FORMULAS HERE WITH t OR Z VALUES]**
+Given all the assumptions we need to make, determining the minimum sample size can be difficult, and the suggestion is to use the entire available budget for data collection.
 
 
 
 
+## External Links and Resources 
 
+Spiegelhalter, D. (2019) The Art of Statistics. Learning from Data - Chapter 10: Answering Questions and Claiming Discoveries
+(An excellent guide for gaining a better intuition for the statistical concepts in use in the real world today, with great concrete examples. Big emphasis on process and where things go wrong in practice, with very limited mathematical apparatus. An essential read for practitioners to help us better articulate how and why we use statistics.) 
 
+[Null and Alternative Hypotheses | Definitions & Examples](https://www.scribbr.co.uk/stats/null-and-alternative-hypothesis/)
 
+[Hypothesis Testing, P Values, Confidence Intervals, and Significance](https://www.ncbi.nlm.nih.gov/books/NBK557421/)
 
+[Choosing the Right Statistical Test | Types & Examples](https://www.scribbr.com/statistics/statistical-tests/)
 
-## External Links and Resources [TO BE UPDATED]
-
-Webster, R. and Lark, M. (2013) Field Sampling for Environmental Science and Management
-(This book provides guidance on the design and analysis of sampling method, backed by sound rationale and statistical theory. It concentrates on design-based sampling for estimates of mean values of environmental properties, emphasizing replication and randomization.) 
-
-[Populations and samples](https://www.bmj.com/about-bmj/resources-readers/publications/statistics-square-one/3-populations-and-samples)
-
-[Confidence Intervals](https://www.bmj.com/about-bmj/resources-readers/publications/statistics-square-one/4-statements-probability-and-confiden)
-
-[Sampling and Estimation](https://www.youtube.com/watch?v=kEUN7_b-ja8)
+[Confidence Interval or P-Value?](https://pmc.ncbi.nlm.nih.gov/articles/PMC2689604/)
