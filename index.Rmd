@@ -24,6 +24,7 @@ library(jpeg)
 library(grid)
 library(cowplot)
 library(emmeans)
+library(learnr)
 
 Whale<-read.csv("Data/Humpback.csv") %>% filter(length.m.>0) %>% filter(Year>=1949 & Year <=1965)
 Whale$sex<-factor(Whale$sex, levels = c("Male", "Female", "Hermaphrodite", "Unknown"))
@@ -355,21 +356,53 @@ If the null hypothesis value lies within the confidence interval limits, we cann
 
 Using a confidence level of 95% and a significance level of 5% will lead to the same results, because they are complementary. The same applies to a confidence level of 99% and a significance level of 1%. If a 99% confidence interval does not include the null hypothesis, then we can reject it with a p-value of less than 0.01.
 
-ADD SOME SORT OF PLOT HERE TO ILLUSTRATE?
+The figure below shows the 95% confidence interval for the mean length of the whales in 1949. Two lines show two null hypothesis we can test: 13.0 and 13.2. 13.0 is included within the limits of the 95% confidence interval, we therefore cannot reject this null hypothesis. However, 13.2 lays outside the limits, therefore we would reject this null hypothesis and the results are significant at the α = 0.05 level. You can check this results in the interactive 1-sample t-test in the next section.
+
+```{r}
+mean_length <- mean(Whale_49$length.m., na.rm = TRUE)
+sd_length <- sd(Whale_49$length.m., na.rm = TRUE)
+n <- sum(!is.na(Whale_49$length.m.))
+se <- sd_length / sqrt(n)
+
+# 95% Confidence Interval
+alpha <- 0.05
+t_critical <- qt(1 - alpha/2, df = n - 1)
+lower_ci <- mean_length - t_critical * se
+upper_ci <- mean_length + t_critical * se
+
+# Print the CI
+cat("95% Confidence Interval: [", lower_ci, ",", upper_ci, "]\n")
+
+# Create a plot of the mean with its confidence interval
+ggplot(data = data.frame(mean = mean_length, lower = lower_ci, upper = upper_ci), aes(x = 1, y = mean)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
+  coord_flip() +
+  geom_hline(yintercept = 13, linetype=2,colour = "blue")+
+  geom_hline(yintercept = 13.2, linetype=2,colour = "red")+
+  labs(
+    title = "95% Confidence Interval of Length and Ho",
+    x = "",
+    y = "Length"
+  ) +
+  plot_theme
+```
 
 
 ## Statistical tests
 
-In this section, we are going to discuss some of the most commonly taught tests that could be used to answer questions about our data. We are not going to go into the mathematical details, we will focus on the type of test and things to consider when running the test. There are plenty of resources on this tests that you can easily find. (ADD IN THESE RESOURCES)
+In this section, we are going to discuss some of the most commonly taught tests that could be used to answer questions about our data. We are not going to go into the mathematical details, we will focus on the type of test and things to consider when running the test. There are plenty of resources on this tests that you can easily find (see at the end of the workbook, in the *External Links and Resources* section).
 
-Before any formal hypothesis test, always explore your data look at summary statistics and plots showing the relationship you are interested in.
+Before any formal hypothesis test, always explore your data and look at summary statistics and plots showing the relationship you are interested in.
+
+Below, I'm going to describe with some detail the simplest test, the 1-sample t-test, and provide then a short list of tests to be used to test specific hypothesis.
 
 
-### Comparing the mean of one numeric variable to a specific value: t-test
+### 1-sample t-test
 
+The *1-sample t-test* is used to compare the population mean of one numeric variable, $\mu$, to a specific value: $$H_0: \mu = \mu_0$$ where $\mu_0$ is a numeric value. 
 
-The *one sample t-test* tests the null hypothesis that the population mean is equal to a specified value: $$H_0: \mu = \mu_0$$, where $\mu_0$ is a numeric value. 
-the test statistic is $$ t=\frac{\bar{x}- \mu_0}{\frac{s}{\sqrt{n}}}$$, where
+The test statistic (this will be computed by the statistical software) is $$ t=\frac{\bar{x}- \mu_0}{\frac{s}{\sqrt{n}}}$$ where
  
 -   $\bar{x}$ is the sample mean
  
@@ -379,9 +412,9 @@ the test statistic is $$ t=\frac{\bar{x}- \mu_0}{\frac{s}{\sqrt{n}}}$$, where
  
 -    *n* is the sample size.
 
-This *t* statistic is compared to its sampling distribution were the null hypothesis true (a *Student's t* with *n-1* degrees of freedom), and a p-value is obtained. Then a decision is made based on the p-value and the level of significance we wish to set. 
+This *t* statistic is compared to its sampling distribution were the null hypothesis true (a *Student's t* with *n-1* degrees of freedom), and a p-value is obtained. Then a decision is made based on the p-value and the level of significance we wish to set. This will be computed by the statistical software as well.
 
-Lets look at our whales from a different year to before, this time 1949. The summary statistics are:
+Let's look at our whales from a different year to before, this time 1949. The summary statistics are:
  
 ```{r}
 Whale_49 %>%
@@ -392,13 +425,8 @@ Whale_49 %>%
     fmt_number(columns =  3:4,decimals = 2)
 ```
  
--   $\bar{x}$ = 13.01
- 
--   *s* = 0.91
- 
--   *n* = 193
 
-An perhaps we want to test the null hypothesis that $\mu_0$ = 13.0. Maybe we have reviewed some scientific literature explaining that this is a standard size for whales, and we are interested to know if our sample matches the value.
+And perhaps we want to test the null hypothesis that $\mu_0$ = 13.0. Maybe we have reviewed some scientific literature explaining that this is a standard size for whales, and we are interested to know if our sample matches the value.
 
 The figure below shows the distribution of the sample lengths, with the sample mean in red, and the null hypothesis value in blue.
 
@@ -423,7 +451,7 @@ t.test(Whale_49$length.m.,mu = 13.0)
 ```
 
 
-Then, the t-statistic is *t* = 0.133, and the *p-value* = 0.894, so we can't reject the null hypothesis based on this evidence. 
+Then, the t-statistic is *t* = 0.133, and the *p-value* = 0.894, so we cannot reject the null hypothesis based on this evidence. 
 
 In the tool below you can see what happens to the test, as we change our hypothetical null hypothesis value. The dotted red lines represent the chosen confidence interval around our sample mean.
 
@@ -466,90 +494,70 @@ output$plot<-renderPlotly({
 ```
 
 
-If we had tested the following null hypothesis, we would have reached the following results:
+You can test different null hypotheses and see how the results change.
  
--   $\mu_{01}$ = 12.90, *p-value* = 0.100, we cannot reject the null hypothesis.
- 
--   $\mu_{02}$ = 12.85, *p-value* = 0.017, we we can reject the null hypothesis if we set the significance level at α = 0.05, but we cannot if α = 0.01.
- 
--   $\mu_{03}$ = 12.80, *p-value* =0.002, we we can reject the null hypothesis if we set the significance level at α = 0.05 or 0.01, but we cannot if α = 0.001.
- 
--   $\mu_{03}$ = 12.75, *p-value* <0.001, we we can reject the null hypothesis for any standard threshold value.
+Note that, although the null hypothesis may change, the limits of the confidence interval do not, unless you change the level of confidence.
 
-Note that, although the null hypothesis may change, the limits of the confidence interval don't, unless you change the level of confidence.
-
-The t.test is based on some assumptions: 
+The 1-sample t-test is based on some assumptions: 
  
 -   the sample mean, $\bar{x}$ is normally distributed. For sample sizes *n > 5* this is usually the case, due to the *Central Limit Theorem*, that states that the sampling distribution of the mean will always be normally distributed, as long as the sample size is large enough, regardless the distribution of the data. As we will have just one sample mean, we will have just to assume that this is the case.
  
--   The individual observations are independent. This is a very strong assumption, and we will find it in most of the other 'simple' hypothesis tests. It basically means that one measurement does not depend on any of the other measurements. When measuring the length (or observing the sex) of a whale, the length or sex of the previously measured/observed whales do not provide any information on this one: if the previous whale was a male, or a long whale does this provide any further clue on what sex or what length will be the current whales? But think about the process of sampling whales across the whole year - there is a good chance we may end up observing the same whale on more than one occasion. If we were able to tag and track the whales we would be confident that this was not happening; but whether this was able to be done in 1949 is perhaps more of a challenge!
+-   The individual observations are independent. This is a very strong assumption, and we will find it in most of the other 'simple' hypothesis tests. It essentially means that one measurement does not depend on any of the other measurements. When measuring the length (or observing the sex) of a whale, the length or sex of the previously measured/observed whales do not provide any information on this one: if the previous whale was a male, or a long whale does this provide any further clue on what sex or what length will be the current whales? But think about the process of sampling whales across the whole year - there is a good chance we may end up observing the same whale on more than one occasion. If we were able to tag and track the whales we would be confident that this was not happening; but whether this was able to be done in 1949 is perhaps more of a challenge!
 
-Other examples might relate to the concentration of a pollutant downstream is not independent from the concentration of that pollutant upstream, or the temperature today is not independent from yesterday's temperature, or samples being obtained from a clustered process where samples from one cluster will not independent of each other.     
-
-### Non parametric one sample tests
-
-We can test whether the center of a population is a given value, without any assumption on the distribution of the variable or its mean. For each *parametric test* such as the t-test (it is *parametric* because we make assumptions on the population distribution), there is a *non-parametric* test that we can use when we can't (or we don't want to) make any assumption on the population distribution. They can be used always, even when we could use the parametric test such as the t-test, however, their results are usually less conclusive. 
-
-The non-parametric test equivalent to the one-sample t-test is the *Wilcoxon one-sample Signed-Rank test*. It is based on ranks and because of that, the location parameter is not here the mean but the median. This test allows to test the null hypothesis that the *sample median* is equal to a given value:
-$$H_0: median = m_0$$
-Data is then sorted, and the observations are given a value, either *-1* if if $x < m_0$ or *+1* if $x > m_0$. If the true median is $m_0$ then the sum of this new values should be equal to 0 or very close to it. Based on this, we obtain a p-value and we can make de decision.
-
-We can use the sample we used for the t-test example to see what happens if we used the Wilcoxon one-sample Signed-Rank test:
- 
--   $m_0$ = 13.5, *p-value* = 0.2729, we cannot reject the null hypothesis.
- 
--   $m_{01}$ = 13.4, *p-value* = 0.9082, we cannot reject the null hypothesis.
- 
--   $m_{02}$ = 13.6, *p-value* = 0.04383, we can reject the null hypothesis if we set the significance level at α = 0.05, but we wouldn't if α = 0.01.
+Other examples might relate to the concentration of a pollutant downstream in a river is not independent from the concentration of that pollutant upstream, or the temperature today is not independent from yesterday's temperature, or samples being obtained from a clustered process where samples from one cluster will not independent of each other.     
 
 
 
-### Comparing the mean of two numeric variables: t-test and Wilcoxon Signed-Rank test
+### 2-sample t-test
 
-To test whether two population means are the same, we are going to use the same tests we used to test one sample's mean: the t-test and the Wilcoxon Signed-Rank test. Testing that two values (the two population means) are the same, is equivalent to test that their difference equals to zero:
-$$H_0: \mu_1 - \mu_2 = 0$$, where $\mu_0$ is a numeric value.
+To test whether two population means are the same, we are going to use the same test we used to test one sample's mean: the t-test. Testing that two values (the two population means) are the same, is equivalent to test that their difference equals to zero:
+$$H_0: \mu_1 - \mu_2 = 0$$ 
+where $\mu_0$ is a numeric value.
 
 Our software of choice will do the hard work for us and we will obtain a p-value that will allow us to make a decision regarding the two population means.
 
-For the parametric test, we will have to add one assumption to those we needed in the one sample test:
+We have to add one assumption to those we needed in the 1-sample t-test:
  
 -   the difference of sample means, $\bar{x_1}-\bar{x_2}$ is normally distributed. 
  
--   The two populations being compared have the same variance. We can test this. there are different tests, we are going to use the *F-test*, see below, although some times a plot could be enough to understand if this assumption holds.
+-   The two populations being compared have the same variance. We can test this. There are different tests, we are going to use the *F-test*, see below, although some times a plot could be enough to understand if this assumption holds.
  
--   The individual observations are independent. 
+-   The individual observations and the two populations are independent. 
 
-The non-parametric alternative is the Wilcoxon Rank-Sum Test (also known sometimes as the Mann-Whitney U test), and is based on ranking the observations. We will only need to test the assumption of independence to perform this test.
+Example: we want to compare if the mean length of male and female whales was the same in 1949: We set the null hypothesis as:
 
-Example: are the male whales longer than female whales? The figure below shows the histogram of the sample lengths for both, male and female.
-
-
+-   $H_0: \mu_M - \mu_F = 0$ 
+ 
+```{r}
+Whale_49 %>%
+    group_by(sex) %>%
+      summarise(n=n(),"Mean Length"=mean(length.m.),"SD Length"=sd(length.m.)) %>%
+  ungroup() %>%
+  gt()%>%
+    fmt_number(columns =  3:4,decimals = 2)
+``` 
+ 
 ```{r, out.width="80%", echo = FALSE}
-img <- readPNG("img/2Samplet-test.png")
-grid.raster(img)
+
+Whale_49 %>%
+  ggplot(aes(x=length.m., group = sex))+
+  geom_bar()+
+  xlab("Length (m)")+
+  ylab("Count")+
+  facet_wrap(~sex,nrow =2)+
+  plot_theme
+
+```
+
+Using any statistical software we can then formulate this as a one sample t test.
+
+```{r}
+t.test(length.m.~sex, data=Whale_49)
 ```
 
  
--   $H_0: \mu_M - \mu_F = 0$ 
+The p-value = 0.03707. Therefore, we can reject the null hypothesis if we set the significance level at α = 0.05, but we could not if we set it at α = 0.01.
  
--   Sample of male whales: $\bar{x_M}$ = 13.093, $s_M$ = 1.33, n=113
- 
--   Sample of female whales: $\bar{x_F}$ = 13.561, $s_F$ = 1.51, n=87
- 
--   t-test: p-value = 0.02353, we can reject the null hypothesis if we set the significance level at α = 0.05, but we wouldn't if α = 0.01.
- 
-If we use the Wilcoxon test:  
- 
--   The null hypothesis (H0) is that the two populations are equal. 
- 
--   The alternative hypothesis (H1) is that the two populations are not equal.
-
-Some researchers interpret this as comparing the medians between the two populations (in contrast, parametric tests compare the means between two independent groups). In general, this is not valid.
-
--   Wilcoxon test: p-value = 0.04679. In theory, we could reject the null hypothesis if we set the significance level at α = 0.05, but the p-value is very close to the α = 0.05 threshold, so we should be very cautious when rejecting the null hypothesis here.
-
-Therefore, according to the t-test, we could reject the null hypothesis that male and female whales are equally long at the significance level of α = 0.05, but we wouldn't if α = 0.01. According to the wilcoxon test we should be cautious when rejecting the null hypothesis.
-
 
 ### Comparing two variances: F-test
 
@@ -559,18 +567,21 @@ F-test to compare two variances:
  
 -   $H_0: \sigma_1^2 = \sigma_2^2 = 0$ 
 
-In the example we used to perform the two-sample t-test, the figure showing the histograms of the male and female sub-samples lengths doesn't show any difference in the variability of the data for the two groups. Let's, however, perform the test:
+In the example we used to perform the two-sample t-test, the figure showing the histograms of the male and female sub-samples lengths does not show any difference in the variability of the data for the two groups. Let's, however, perform the test:
  
 -   $H_0: \sigma_M^2 = \sigma_F^2 = 0$ 
  
--   Sample of male whales: $s_M$ = 1.33, n=113
- 
--   Sample of female whales: $s_F$ = 1.51, n=87
- 
--   test *p-value* = 0.2022
+```{r}
+var.test(length.m.~sex, data=Whale_49)
+```
 
-we cannot reject the null hypothesis that the two variances are equal, so in the t-test we performed above all three assumptions hold.
+The F-test *p-value* = 0.0002297. We, therefore, reject the null hypothesis that the two variances are equal, so in the t-test we performed above the assumption of equal variances does not hold.
 
+### Non parametric tests
+
+We can test whether the center of a population is a given value, or that two distributions are equal without any assumption on the distribution of the variable or its mean. For each *parametric test* such as the t-test (it is *parametric* because we make assumptions on the population distribution), there is a *non-parametric* test that we can use when we cannot (or we do not want to) make any assumption on the population distribution. They can be used always, even when we could use the parametric test such as the t-test, however, their results are usually less conclusive. 
+
+The non-parametric test equivalent to the t-test tests is the *Wilcoxon test*. It is based on ranks instead of the actual values. 
 
 ### Comparing one proportion to a value or two proportions
 
@@ -579,30 +590,20 @@ The tests to compare proportions are based in the fact that we can use the norma
 Testing that one population proportion is equal to a value $p_0$, means setting the null hypothesis: $$H_0: p = p_0$$ 
 
 Testing that two population proportions are equal, means setting the null hypothesis: $$H_0: p_A = p_B$$
-Example: is the proportion of males = 50%. We use the same sample of 200 whales used to compare lengths and variances, and then perform the test:
+Example: is the proportion of males = 50%: 
  
 -   $H_0: p_M = 0.5$
 
-In the sample, there are 113 male and 87 female whales, so the proportion of males is $p_M$ = 0.565. The test p-value is *p-value* = 0.0771 so we cannot reject the null hypothesis that the proportion of whales is 0.5. 
-
-Let's compare now the proportion of male whales in two periods. Is the proportion of caught males in the period 1925-1955 the same as the proportion of caught males in 1956-1978? We are going to use the same sample of 200 whales:
+Or the proportion of males and females is equal: 
  
--   $H_0: p_{25-55} = p_{56-78} = 0$ 
- 
--   period 1925-1955: $n_{25-55}$ = 59, $p_{25-55}$ = 0.567
- 
--   period 1956-1978: $n_{56-78}$ = 54, $p_{56-78}$ = 0.468
- 
--   test *p-value* = 0.2105
-
-Therefore, we cannot reject the null hypothesis that the proportion of caught males has been the same in the two periods.
+-   $H_0: p_M = p_F$
 
 
 ### Comparing the mean of more than two numeric variables: ANOVA and Kruskal-Wallis test
 
-To test if *k > 2* population means are the same, we will use the ANOVA and the Kruskal-Wallis test. ANOVA is the acronym of ANalysis Of VAriance, because it compares the variability among the $k$ sample means, one per each group, with the variability within the samples.
+To test if *k > 2* population means are equal, we will use the ANOVA and the Kruskal-Wallis test. ANOVA is the acronym of ANalysis Of VAriance, because it compares the variability among the $k$ sample means with the variability within the samples.
 
-for the ANOVA, the null hypothesis to test is:
+For the ANOVA, the null hypothesis to test is:
 $$H_0: \mu_A = \mu_B = \mu_C = ... = \mu_K  $$.
 
 Our software of choice will do the work and we will obtain a p-value that will allow us to make a decision regarding the whether the *k* population means are equal or at least one of them is different. 
@@ -611,52 +612,18 @@ For the ANOVA, we will have the same assumptions that we had for the 2-sample t-
  
 -   the sample means, $\bar{x_i}$ are normally distributed. 
  
--   The *k* populations being compared have the same variance. We can test this, however, we will usually perform the test graphically, and, therefore, we won't get any p-value out of it.
+-   The *k* populations being compared have the same variance. We can test this, however, we will usually perform the test graphically, and, therefore, we will not get any p-value out of it.
  
 -   The individual observations are independent. 
 
 
-Example: we want to test whether the mean length has changed over time. To do so, we are going to split the catches in the following four periods: *1949-1954*"*, *1955-1959*"*, and *1960-1963*. The figure below shows the histogram of the sample lengths for the four periods.
 
-
-```{r}
-Whale$period2<-ifelse(Whale$Year<1955, "1949-1954",
-                        ifelse(Whale$Year<1960, "1955-1959","1960-1963"))
-
-ggplot(Whale, aes(x=length.m., group = period2))+
-  geom_histogram(bins=10)+
-  labs(x="Length(m)")+
-  facet_wrap(~period2,nrow =3)
-
-```
-
-We are going to perform the following test:
-
--   $H_0: \mu_A = \mu_B = \mu_C = \mu_D$, where the subscripts *A*, *B*, *C* and *D*  refer to the four periods in which we have split the data,
- 
--   ANOVA: p-value = $2.2*10^{-16}$, it is very small, therefore we can reject the null hypothesis  at any of the usual significant levels,  α.
-
-According to the plot, the variability of the four samples seems to be quite similar. Since the ANOVA is just a special case of linear model, we can use the tools and methods used in the analysis of linear regression models to test the assumptions for the ANOVA. In Module 4 you will discover those such techniques.
-
-The non-parametric test alternative is the Kruskal-Wallis test. We will only need to test the assumption of independence to perform this test.
- 
--   Kruskal-Wallis test: p-value = $2.054*10^{05}$. Again, the p-value is very small and therefore  we can reject the null hypothesis  at any of the usual significant levels,  α.
+The non-parametric test alternative is the *Kruskal-Wallis test*. We will only need to test the assumption of independence to perform this test.
 
 
 Both tests, ANOVA and Kruskal-Wallis test the null hypothesis that all the *k* population means are equal. When we reject the null hypothesis we have evidence that not all the means are equal, but this can mean, basically, anything: *k-1* means are not different and 1 mean is different from all the others, or all *k* means are different from one each other, or anything in between. We have tests to better understand what it means to reject the null hypothesis in an ANOVA or Kruskal-Wallis tests, that involve *multiple comparisons*: comparing each mean to all the others. The number of comparisons to perform grows quite quickly with *n*: if *n=3* we need 3 mean comparisons, if *n=4* we will need 6 comparisons, and if *n=5* 10 comparisons are needed.
 
 The p-value is the probability of being wrong when rejecting the null hypothesis, and we usually set a significance level for the p-value as a threshold to reject the null hypothesis. For example, if we set α = 0.05, the probability of detecting a difference just by chance (incorrectly rejecting the null hypothesis) is 5%. However, this is valid when we perform *one single* test. When we compare groups multiple times, the probability of finding at least one difference just by chance increases depending on the number of times we perform the comparison: for *n=4* comparisons, the probability of finding at least one difference just by chance is 26.5% and this probability increases to 40.1% when *n=10*. The multiple comparison problem also applies to confidence intervals: the probability that at least one 95% confidence interval does not contain the true population value when obtaining 10 simultaneous 95% confidence intervals is 40.1%!
-
-
-```{r}
-model_ANOVA<-lm(length.m.~period2, data=Whale)
-anova(model_ANOVA)
-
-emmeans(model_ANOVA,~period2)
-```
-
-[TO BE FINISHED}]
-
 
 
 ## p-value and sample size
@@ -680,23 +647,23 @@ We can also determine the minimum sample size required to detect a difference in
 Given all the assumptions we need to make, determining the minimum sample size can be difficult, and the suggestion is to use the entire available budget for data collection.
 
 
-## What p-values can and can't do
+## What p-values can and cannot do
 
-we have a coin that we assume is fair. We flip it several times and observe the result: number of heads in *n* flips.
+We have a coin that we assume is fair. We flip it several times and observe the result: number of heads in *n* flips.
 
 The null hypothesis is that the coin is fair, $H_0: p_H = 0.5$.
 
-we flip the coin 10 times and we obtain 10 heads. This is our sample. 
+We flip the coin 10 times and we obtain 10 heads. This is our sample. 
 
 ```{r}
 prop.test(10, n=10, p=0.5)
 ```
 
-The p-value is small enough (0.004) for us to confidently reject the null hypothesis. Right? well, maybe wrong!
+The p-value is small enough (0.004) for us to confidently reject the null hypothesis. Right? Well, maybe wrong!
 
-Now let's carry out the experiment in a slightly different way: 1024 people are given a fair coin, and they flip it. Those that get heads remain, those that get tails, leave the room. We expect about 50% staying and 50% leaving, about 512. Then we repeat the process a second time, and a third, and a fort, up to a tenth time. We expect one person to still be in the room at the end of this process. 
+Now, let's carry out the experiment in a slightly different way: 1024 people are given a fair coin, and they flip it. Those that get heads remain, those that get tails, leave the room. We expect about 50% staying and 50% leaving, about 512. Then we repeat the process a second time, and a third, and a fourth, up to a tenth time. We expect one person to still be in the room at the end of this process. 
 
-As you can see with the example, the p-value sometimes can be misleading. and it is not just that it's definition is a bit convoluted. Even assuming that we agree with the definition, if you run enough experiment you can always get a p-value that demonstrates what you wanted to demonstrate, just by random chance.
+As you can see with the example, the p-value sometimes can be misleading. And it is not just that it's definition is a bit convoluted. Even assuming that we agree with the definition, if you run enough times an experiment, you can always get a p-value that demonstrates what you wanted to demonstrate, just by random chance.
 
 There are criticisms about the use of p-value, there is a whole approach to statistics, the Bayesian approach, that plainly rejects them. In 2016, the American Statistical Association managed to get a group of statisticians to agree on six principles about p-values:
 
@@ -714,19 +681,106 @@ The significance levels threshold are, as we have seen, arbitrary. A *significan
 
 4. Proper inference requires full reporting and transparency
 
-In the example, we have seen that if you repeat the experiment enough times, you will end up with a significant result, even if the null hypothesis is true. We should report our sampling scheme, make data available, describe the methods used so others can replicate our experiment.
+In the example above when 1024 people flipped 10 times a coin, we have seen that if you repeat the experiment enough times, we will end up with a significant result, even if the null hypothesis is true. We should report our sampling scheme, make data available, describe the methods used so others can replicate our experiment, and confirm whether there is an effect or our result was due to chance.
 
 5. A p-value does not measure the size of an effect or the importance of a result
 
-A significant result tells us that the observed difference is unlikely to be due to random chance, but desn't tell us anything about how large or small this difference is.
+A significant result tells us that the observed difference or effect is unlikely to be due to random chance, but does not tell us anything about how large or small this difference (or effect) is.
 
-6. By itself, a p-value does not provide a good measure of evidence regarding a model or  hypothesis. i.e. p-value close to 0.05 offers only weak evidence against the null hypothesis 
+6. By itself, a p-value does not provide a good measure of evidence regarding a model or  hypothesis. I.e. p-value close to 0.05 offers only weak evidence against the null hypothesis 
+
+## Exercises
+
+In this set of exercises there are a few multiple choice questions, to check you have followed the key messages from this module, and then a final question which requires some more thought. We will discuss the final question in this week's webinar - please note down through any major challenges you can think of in this process, either linked to the scenario described or ones which you have faced, or know that you may face in the future, when conducting sampling processes and we can talk through these problems during the session.
+
+
+### Question 1
+
+The picture below comes fro the paper:
+Cross-country variation in people’s connection to nature
+Soga, Masashi et al.
+One Earth, Volume 8, Issue 2, 101194
+
+You can access the paper here:
+<https://www.cell.com/one-earth/fulltext/S2590-3322(25)00020-X> 
+
+```{r, out.width="80%", echo = FALSE}
+  img <- readPNG("img/Q1.png")
+grid.raster(img)
+```
+
+Interpret the results of the table:
+
+
+1. What is the null hypothesis associated to each variable?
+<details><summary>Click to reveal answer</summary>
+
+Since the test are about the effect of each variable, the null hypothesis is that there is no effect, or that the effect = 0.
+
+</details>
+
+2. What is the alternative hypothesis associated to each variable?
+<details><summary>Click to reveal answer</summary>
+
+The null hypothesis is that there is an effect, or that the effect $\ne$ 0. This is the usual alternative hypothesis.
+
+</details>
+
+3. How do you interpret each of the p-values in the table
+<details><summary>Click to reveal answer</summary>
+
+This is the answer
+
+</details>
+4. Can you provide the (approximate) 95% confidence interval for the first (Biodiversity) and last variable (Gender) in the table? How do you relate the 95% confidence interval and the significance of the result? 
+5. Is the estimate related to the p-value?
+
+
+I think a 
+```{r q1, echo = FALSE}
+  question("What is the null hypothesis associated to each variable?",
+    answer("True",message = "We could say either '60% of wales within our sample are male' or 'the estimated percentage of male whales in our population is 60%'. But unless we conducted a census we do not know exactly the percentage of male whales in the whole population, so we cannot claim this statement to be true."),
+    answer("False", correct = TRUE,message = "We could say either '60% of wales within our sample are male' or 'the estimated percentage of male whales in our population is 60%'. But unless we conducted a census we do not know exactly the percentage of male whales in the whole population, so we cannot claim this statement to be true."),
+    random_answer_order = FALSE, allow_retry=TRUE)
+```
+
+
+The table above shows some results looking at the the percentage of male whales from a sample of 400 whales, that we can consider is a representative and random sample of our population of interest of all whales of a particular species.
+
+
+```{r q2, echo = FALSE}
+  question("Using the same sample, a 99% Confidence Interval would be narrower than the 95% Confidence Interval",
+    answer("True",message = "With the same sample, the 99% CI is always wider than the 95% CI, as you in order to be 'more confident' that your CI includes the true value of the population, you need to include a wider range of values"),
+    answer("False", correct = TRUE,message = "With the same sample, the 99% CI is always wider than the 95% CI, as you in order to be 'more confident' that your CI includes the true value of the population, you need to include a wider range of values"),
+    random_answer_order = FALSE, allow_retry=TRUE)
+```
+
+
+```{r q3, echo = FALSE}
+  question("There is a chance that the proportion of male whales is either less than 55% or more than 65%",
+    answer("True", correct = TRUE,message = "If it is a truly random sample then the chance of obtaining a 95% CI that does not contain the true population value would be 5%"),
+    answer("False",message = "If it is a truly random sample then the chance of obtaining a 95% CI that does not contain the true population value would be 5%"),
+    random_answer_order = FALSE, allow_retry=TRUE)
+```
+
+```{r q4, echo = FALSE}
+  question("The width of the Confidence Interval is a measure of the precision of my estimate",
+    answer("True", correct = TRUE,message = "Confidence intervals are a measure of precision; not of variability or bias"),
+    answer("False",message = "Confidence intervals are a measure of precision; not of variability or bias"),
+    random_answer_order = FALSE, allow_retry=TRUE)
+```
+
+
+### Question 2
 
 
 ## External Links and Resources 
 
-Spiegelhalter, D. (2019) The Art of Statistics. Learning from Data - Chapter 10: Answering Questions and Claiming Discoveries
+Spiegelhalter, D. (2019) *The Art of Statistics. Learning from Data* - Chapter 10: Answering Questions and Claiming Discoveries
 (An excellent guide for gaining a better intuition for the statistical concepts in use in the real world today, with great concrete examples. Big emphasis on process and where things go wrong in practice, with very limited mathematical apparatus. An essential read for practitioners to help us better articulate how and why we use statistics.) 
+
+Box, G.E.P., Hunter, J.S. and Hunter, W.G. (2005) *Statistic for Experimenters*.
+(A classic guide and reference for the application of statistical methods, especially as applied to experimental design. Provides lots of examples, although almost none of them applied to environmental sciences. A classic and very didactic book to understand statistical thinking and hos statistical methods work.)
 
 [Null and Alternative Hypotheses | Definitions & Examples](https://www.scribbr.co.uk/stats/null-and-alternative-hypothesis/)
 
@@ -735,3 +789,5 @@ Spiegelhalter, D. (2019) The Art of Statistics. Learning from Data - Chapter 10:
 [Choosing the Right Statistical Test | Types & Examples](https://www.scribbr.com/statistics/statistical-tests/)
 
 [Confidence Interval or P-Value?](https://pmc.ncbi.nlm.nih.gov/articles/PMC2689604/)
+
+[Common pitfalls in statistical analysis: The perils of multiple testing](https://pmc.ncbi.nlm.nih.gov/articles/PMC4840791/)
