@@ -565,11 +565,11 @@ This is a test that we can perform along with the two-sample t-test, to make sur
 
 F-test to compare two variances:
  
--   $H_0: \sigma_1^2 = \sigma_2^2 = 0$ 
+-   $H_0: \sigma_1^2 = \sigma_2^2$ 
 
 In the example we used to perform the two-sample t-test, the figure showing the histograms of the male and female sub-samples lengths does not show any difference in the variability of the data for the two groups. Let's, however, perform the test:
  
--   $H_0: \sigma_M^2 = \sigma_F^2 = 0$ 
+-   $H_0: \sigma_M^2 = \sigma_F^2$ 
  
 ```{r}
 var.test(length.m.~sex, data=Whale_49)
@@ -713,65 +713,110 @@ Interpret the results of the table:
 
 
 1. What is the null hypothesis associated to each variable?
+
 <details><summary>Click to reveal answer</summary>
 
 Since the test are about the effect of each variable, the null hypothesis is that there is no effect, or that the effect = 0.
 
 </details>
 
+
 2. What is the alternative hypothesis associated to each variable?
-<details><summary>Click to reveal answer</summary>
+<details>
+<summary>Click to reveal answer</summary>
 
 The null hypothesis is that there is an effect, or that the effect $\ne$ 0. This is the usual alternative hypothesis.
 
 </details>
 
 3. How do you interpret each of the p-values in the table
+
 <details><summary>Click to reveal answer</summary>
 
-This is the answer
+The first two variables have a p-value that will not allow us to reject the null hypothesis.
+All the other p-values allow to reject the null hypothesis, and what is shown is the "maximum" level at which they are significant. For example, Gender is significant at α = 0.05 level, but not at α = 0.01 level, and Natural disaster risk is significant at α = 0.01 but not at α = 0.005 level.
 
 </details>
+
 4. Can you provide the (approximate) 95% confidence interval for the first (Biodiversity) and last variable (Gender) in the table? How do you relate the 95% confidence interval and the significance of the result? 
+
+<details><summary>Click to reveal answer</summary>
+
+the 95% confidence interval is, approximately, estimate ± 2xSE. Then, for example, for Gender the (approximate) 95% confidence interval would be [0.01; 0.09], that does not include the *0*, and hence the p-value is < 0.05, which is true.
+
+</details>
+
 5. Is the estimate related to the p-value?
 
+<details><summary>Click to reveal answer</summary>
 
-I think a 
-```{r q1, echo = FALSE}
-  question("What is the null hypothesis associated to each variable?",
-    answer("True",message = "We could say either '60% of wales within our sample are male' or 'the estimated percentage of male whales in our population is 60%'. But unless we conducted a census we do not know exactly the percentage of male whales in the whole population, so we cannot claim this statement to be true."),
-    answer("False", correct = TRUE,message = "We could say either '60% of wales within our sample are male' or 'the estimated percentage of male whales in our population is 60%'. But unless we conducted a census we do not know exactly the percentage of male whales in the whole population, so we cannot claim this statement to be true."),
-    random_answer_order = FALSE, allow_retry=TRUE)
-```
+The p-value depends on how far from 0 is $\frac{|estimate|}{SE}$. For example, Education has an estimate that is less than the Natural risk disaster, but its p-value is smaller too, because the SE is also smaller. 
 
-
-The table above shows some results looking at the the percentage of male whales from a sample of 400 whales, that we can consider is a representative and random sample of our population of interest of all whales of a particular species.
-
-
-```{r q2, echo = FALSE}
-  question("Using the same sample, a 99% Confidence Interval would be narrower than the 95% Confidence Interval",
-    answer("True",message = "With the same sample, the 99% CI is always wider than the 95% CI, as you in order to be 'more confident' that your CI includes the true value of the population, you need to include a wider range of values"),
-    answer("False", correct = TRUE,message = "With the same sample, the 99% CI is always wider than the 95% CI, as you in order to be 'more confident' that your CI includes the true value of the population, you need to include a wider range of values"),
-    random_answer_order = FALSE, allow_retry=TRUE)
-```
-
-
-```{r q3, echo = FALSE}
-  question("There is a chance that the proportion of male whales is either less than 55% or more than 65%",
-    answer("True", correct = TRUE,message = "If it is a truly random sample then the chance of obtaining a 95% CI that does not contain the true population value would be 5%"),
-    answer("False",message = "If it is a truly random sample then the chance of obtaining a 95% CI that does not contain the true population value would be 5%"),
-    random_answer_order = FALSE, allow_retry=TRUE)
-```
-
-```{r q4, echo = FALSE}
-  question("The width of the Confidence Interval is a measure of the precision of my estimate",
-    answer("True", correct = TRUE,message = "Confidence intervals are a measure of precision; not of variability or bias"),
-    answer("False",message = "Confidence intervals are a measure of precision; not of variability or bias"),
-    random_answer_order = FALSE, allow_retry=TRUE)
-```
+</details>
 
 
 ### Question 2
+
+we want to test the hypothesis that the mean length in humpback wales is equal for males and females. We have the data collected in 1962 as sample, that we can consider is representative of the population of humpback whales.
+
+-   $H_0: \mu_M = \mu_F = 0$ 
+
+ 
+```{r}
+Whale_49 %>%
+    group_by(sex) %>%
+      summarise(n=n(),"Mean Length"=mean(length.m.),"SD Length"=sd(length.m.)) %>%
+  ungroup() %>%
+  gt()%>%
+    fmt_number(columns =  3:4,decimals = 2)
+```
+ 
+ 
+```{r, out.width="80%", echo = FALSE}
+
+Whale_62 %>%
+  ggplot(aes(x=length.m., group = sex))+
+  geom_bar()+
+  xlab("Length (m)")+
+  ylab("Count")+
+  facet_wrap(~sex,nrow =2)+
+  plot_theme
+
+```
+
+
+Choose the alternative hypothesis ans see if/how the result of the test changes: 
+
+
+-   $H_0: \mu_M \ne \mu_F$ 
+
+
+```{r}
+t.test(length.m.~sex, data=Whale_62, alternative="two.sided")
+
+```
+
+
+-   $H_0: \mu_M \lt \mu_F$ 
+
+
+```{r}
+t.test(length.m.~sex, data=Whale_62, alternative="less")
+
+```
+
+
+-   $H_0: \mu_M \gt \mu_F$ 
+
+
+```{r}
+t.test(length.m.~sex, data=Whale_62, alternative="greater")
+
+```
+
+
+
+
 
 
 ## External Links and Resources 
