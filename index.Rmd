@@ -69,11 +69,11 @@ Hypothesis testing is the process that allows us to answer questions about our d
 
 This is a basic topic in statistics, because it lays the foundation of *statistical inference*, the process that allows us to make statements and answer questions about a population with incomplete information, as we only have the data contained in the sample.
 
-Experience tells us that this is one of the hardest topics to learn too. We’ll try to avoid all the mathematical apparatus surrounding it and concentrate on a few important concepts and on the process of testing statistical hypotheses.
+Experience tells us that this is one of the hardest topics to learn too. We’ll try to avoid all the mathematical apparatus surrounding it, and concentrate on a few important concepts and on the process of testing statistical hypotheses.
 
 In this session, we will cover:
 
--   What a statistical hypothesis is, and the concept of the null hypothesis.
+-   What a statistical hypothesis is, and the concepts of the null and alternative hypotheses.
 
 -   The concept of the p-value, whether to use one side or two sides of the sampling distribution to compute it, and how it relates to the confidence interval covered in Module 2.
 
@@ -82,6 +82,8 @@ In this session, we will cover:
 -   The process of hypothesis testing. 
 
 -   Some basic statistical tests that use the hypothesis testing method.
+
+-   Review the principles that tell us what p-values can and cannot do.
 
 In the video I go through the process of hypothesis testing, with the use of examples and avoiding formulae. 
 
@@ -173,7 +175,7 @@ Often, the alternative hypothesis is the same as the research hypothesis. In oth
 
 The alternative hypothesis is the complement of the null hypothesis. Null and alternative hypotheses are exhaustive, meaning that together they cover every possible outcome. They are also mutually exclusive, meaning that only one can be true at a time.
 
-Alternative hypotheses often include phrases such as “an effect”, “a difference”, or “a relationship”. When alternative hypotheses are written in mathematical terms, they always include an inequality (usually ≠, but sometimes > or <). As with the null hypotheses, there are many acceptable ways to phrase an alternative hypothesis.
+Alternative hypotheses often include phrases such as “an effect”, “a difference”, or “a relationship”. When alternative hypotheses are written in mathematical terms, they always include an inequality (usually '≠', but sometimes '>' or '<'). As with the null hypotheses, there are many acceptable ways to phrase an alternative hypothesis.
 
 In the example of the whales, we could state the null hypothesis as: the proportion of male whales is 50%, or the proportion of male whales is equal to the proportion of female whales. The alternative hypothesis, then, will be one of the following three options:
 
@@ -183,7 +185,7 @@ In the example of the whales, we could state the null hypothesis as: the proport
 
 -    $H_1: p_M \lt 0.5$ or $H_1: p_M \lt p_F$
 
-
+We will have to choose one of the possible alternative hypothesis, according to what we would like to demonstrate.
 
 ## The p-value
 
@@ -300,7 +302,7 @@ In our example of the proportion of male and female whales, we had the following
 
 -   We observed the sex and *measured the proportion of male whales in the sample: 56.8%*.
 
--   We obtained the *p-value = 0.00022*, which is the probability of obtaining a value as extreme as this if the null hypothesis is true. This is the *two-sided test*.
+-   We obtained the *p-value = 0.00022*, which is the probability of obtaining a value as extreme as this if the null hypothesis is true. This is the *two-sided test*, the one that corresponds to the alternative hypothesis stated above.
 
 While there is a very small chance that we could have obtained this percentage if the null hypothesis were really true, it seems very unlikely. So, the question now is whether we think the *p-value* is small enough for us to consider that the difference is *statistically significant*, and, therefore, the alternative hypothesis to be true.
 
@@ -333,13 +335,15 @@ There are a large number of different 'hypothesis tests' (see the section on *St
 
 1-Set up a question in terms of a null hypothesis and an alternative hypothesis that we want to test. We usually use the notation H₀ for the null hypothesis and H₁ for the alternative hypothesis.
 
-2- Choose a test statistic that estimates something which, if it turns out to be extreme enough, would lead us to doubt the null hypothesis. You will not actually have to calculate this statistic yourself, as each (standard) statistical test has already defined the relevant test statistic.
+2- Choose a test statistic that estimates something which, if it turns out to be extreme enough, would lead us to doubt the null hypothesis. You will not actually have to calculate this statistic yourself, as the relevant test statistic has already been defined for each (standard) statistical test .
 
-3- Generate the sampling distribution of this test statistic, assuming the null hypothesis is true.
+3- Collect your data and compute the test statistic.
 
-4- Obtain the p-value by comparing your test statistic with the sampling distribution. The p-value is the probability of observing such an extreme statistic if the null hypothesis is true. When setting up the alternative hypothesis we decided whether to use a one-sided or two-sided p-value. In most tests, we will use the two-sided p-value.
+4- Generate the sampling distribution of this test statistic, assuming the null hypothesis is true.
 
-5- Declare the result significant if the p-value is below some critical threshold, α.
+5- Obtain the p-value by comparing your test statistic with the sampling distribution. The p-value is the probability of observing such an extreme statistic if the null hypothesis is true. When setting up the alternative hypothesis we decided whether to use a one-sided or two-sided p-value. In most tests, we will use the two-sided p-value.
+
+6- Declare the result significant if the p-value is below some critical threshold, α.
 
 There is a good chance that if you have been taught statistics at school or undergraduate level, you may have had to calculate many of these steps by hand and been asked to consult long tables of numbers containing test statistics and critical thresholds.
 
@@ -350,13 +354,13 @@ It is important to emphasise that the exact p-value is conditional not only on t
 
 ### Confidence Interval for hypothesis testing
 
-Although the confidence interval is a tool for estimation, we can also use it for hypothesis testing or to support it. Instead of generating the sampling distribution under the null hypothesis for the test statistic and comparing the test statistic with this distribution to obtain the p-value (steps 3 and 4 in the hypothesis testing process above), we can generate the confidence interval for the statistic, and observe whether the null hypothesis value lies within its limits or outside them.
+Although the confidence interval is a tool used in estimation, we can also use it for hypothesis testing or to support it. Instead of generating the sampling distribution under the null hypothesis for the test statistic and comparing the test statistic with this distribution to obtain the p-value (steps 4 and 5 in the hypothesis testing process above), we can generate the confidence interval for the statistic, and observe whether the null hypothesis value lies within its limits or outside them.
 
 If the null hypothesis value lies within the confidence interval limits, we cannot reject it and the results are not significant. Conversely, if the value lies outside the confidence interval limits, the result is significant and there is sufficient evidence to reject the null hypothesis.
 
 Using a confidence level of 95% and a significance level of 5% will lead to the same results, because they are complementary. The same applies to a confidence level of 99% and a significance level of 1%. If a 99% confidence interval does not include the null hypothesis, then we can reject it with a p-value of less than 0.01.
 
-The figure below shows the 95% confidence interval for the mean length of the whales in 1949. Two lines show two null hypothesis we can test: 13.0 and 13.2. 13.0 is included within the limits of the 95% confidence interval, we therefore cannot reject this null hypothesis. However, 13.2 lays outside the limits, therefore we would reject this null hypothesis and the results are significant at the α = 0.05 level. You can check this results in the interactive 1-sample t-test in the next section.
+The figure below shows the 95% confidence interval for the mean length of the whales in 1949. Two dotted lines show two null hypothesis we can test: 13.0 and 13.2. 13.0 (blue dotted line) is included within the limits of the 95% confidence interval, we therefore cannot reject this null hypothesis. However, 13.2 (red dotted line) lays outside the limits, therefore we would reject this null hypothesis and the results are significant at the α = 0.05 level. You can check this results in the interactive 1-sample t-test in the next section.
 
 ```{r}
 mean_length <- mean(Whale_49$length.m., na.rm = TRUE)
@@ -621,30 +625,32 @@ For the ANOVA, we will have the same assumptions that we had for the 2-sample t-
 The non-parametric test alternative is the *Kruskal-Wallis test*. We will only need to test the assumption of independence to perform this test.
 
 
-Both tests, ANOVA and Kruskal-Wallis test the null hypothesis that all the *k* population means are equal. When we reject the null hypothesis we have evidence that not all the means are equal, but this can mean, basically, anything: *k-1* means are not different and 1 mean is different from all the others, or all *k* means are different from one each other, or anything in between. We have tests to better understand what it means to reject the null hypothesis in an ANOVA or Kruskal-Wallis tests, that involve *multiple comparisons*: comparing each mean to all the others. The number of comparisons to perform grows quite quickly with *n*: if *n=3* we need 3 mean comparisons, if *n=4* we will need 6 comparisons, and if *n=5* 10 comparisons are needed.
+Both tests, ANOVA and Kruskal-Wallis test the null hypothesis that all the *k* population means are equal. When we reject the null hypothesis we have evidence that not all the means are equal, but this can mean, basically, anything: *k-1* means are not different and 1 mean is different from all the others, or all *k* means are different from one each other, or anything in between. We have tests to better understand what it means to reject the null hypothesis in an ANOVA or Kruskal-Wallis tests, that involve *multiple comparisons*: comparing each mean to all the others. The number of comparisons to perform grows quite quickly with *n*: if *n=3* we need 3 mean comparisons, if *n=4* we will need 6 comparisons, and if *n=5*, 10 comparisons are needed.
 
-The p-value is the probability of being wrong when rejecting the null hypothesis, and we usually set a significance level for the p-value as a threshold to reject the null hypothesis. For example, if we set α = 0.05, the probability of detecting a difference just by chance (incorrectly rejecting the null hypothesis) is 5%. However, this is valid when we perform *one single* test. When we compare groups multiple times, the probability of finding at least one difference just by chance increases depending on the number of times we perform the comparison: for *n=4* comparisons, the probability of finding at least one difference just by chance is 26.5% and this probability increases to 40.1% when *n=10*. The multiple comparison problem also applies to confidence intervals: the probability that at least one 95% confidence interval does not contain the true population value when obtaining 10 simultaneous 95% confidence intervals is 40.1%!
+The p-value is the probability of being wrong when rejecting the null hypothesis, and we usually set a significance level for the p-value as a threshold to reject the null hypothesis. For example, if we set α = 0.05, the probability of detecting a difference just by chance (incorrectly rejecting the null hypothesis) is 5%. However, this is valid only when we perform *one single* test. When we compare groups multiple times, the probability of finding at least one difference just by chance increases depending on the number of times we perform the comparison: for *n=4* comparisons, the probability of finding at least one difference just by chance is 26.5% and this probability increases to 40.1% when *n=10*. The multiple comparison problem also applies to confidence intervals: the probability that at least one 95% confidence interval does not contain the true population value when obtaining 10 simultaneous 95% confidence intervals is 40.1%!
 
+Therefore, when we reject the null hypothesis that not all *k* population means are equal, we cannot simply perform the all the pairwise comparisons using a 2-sample t-test for each of them to understand which population mean is different from which. We need to use a method that allows the simultaneous pairwise comparison of all the *k* population means.   
 
 ## p-value and sample size
 
-We have already discussed the relationship between the significance level, the p-value, and the confidence interval. In Module 2, we discussed the relationship between the width of the confidence interval and the sample size, and we saw that the width of the confidence interval is a function of $1/\sqrt(n)$, where *n* is the sample size. 
+We have already discussed the relationship between the significance level, the p-value, and the confidence interval. In Module 2, we examined the relationship between the width of the confidence interval and the sample size, and we saw that the width of the confidence interval is a function of $1/\sqrt(n)$, where *n* is the sample size. 
 
 Therefore, if there is a true difference (whether between two population means, between *k* population means, or between the population mean and a specific value)...
  
--   We are more likely to detect a difference by rejecting the null hypothesis the larger the sample size is 
+-   We are more likely to detect a difference by rejecting the null hypothesis as the sample size increases. 
  
--   At the same time, for a given sample size, the smaller the difference we want to be able to detect, the more difficult it will be to reject the null hypothesis. 
+-   AAt the same time, for a given sample size, the smaller the difference we wish to detect, the more difficult it will be to reject the null hypothesis. 
  
--   In addition, the variability of our data also plays a role in the tests: given a sample size and a difference we want to be able to detect, the larger the variability of our data is, the more difficult it will be to reject the null hypothesis. 
+-   In addition, the variability of the data also plays a role in hypothesis testing: given a sample size and a difference we wish to detect, the greater the variability of the data, the more difficult it will be to reject the null hypothesis. 
  
--   Finally, if all of the above are fixed, the minimum sample size depends on the sampling scheme used. It will be smallest for a simple random sampling design and larger for other designs, with how much larger depending on the particular design used.
+-   Finally, if all of the above are fixed, the minimum required sample size depends on the sampling scheme used. It will be smallest for a simple random sampling design and larger for other designs, with the extent of the increase depending on the specific design employed.
 
-Therefore, we can determine our sample size as the smallest one that will allow us to reject the null hypothesis, given the minimum difference we would like to be able to detect. To do this, we need to define this minimum detectable difference and obtain an estimate of the population measure’s variance.
+Therefore, we can determine our sample size as the smallest that will allow us to reject the null hypothesis, given the minimum difference we would like to detect. To do this, we need to define this minimum detectable difference and obtain an estimate of the population variance.
 
-We can also determine the minimum sample size required to detect a difference in proportions. The only difference is that the minimum sample size depends on the proportion $p$, being maximal at 0.5 and decreasing as it approaches the limits of 0 or 1. Therefore, we need an initial estimate of the proportion $p$ that we want to estimate and/or test.
+We can also determine the minimum sample size required to detect a difference in proportions. The key difference is that the minimum sample size depends on the proportion $p$, being maximal at 0.5 and decreasing as it approaches the limits of 0 or 1. Therefore, we need an initial estimate of the proportion $p$ that we wish to estimate and/or test.
 
-Given all the assumptions we need to make, determining the minimum sample size can be difficult, and the suggestion is to use the entire available budget for data collection.
+GGiven all the assumptions that need to be made, determining the minimum sample size can be challenging. A common recommendation is to use the entire available budget for data collection.
+
 
 
 ## What p-values can and cannot do
@@ -659,40 +665,39 @@ We flip the coin 10 times and we obtain 10 heads. This is our sample.
 prop.test(10, n=10, p=0.5)
 ```
 
-The p-value is small enough (0.004) for us to confidently reject the null hypothesis. Right? Well, maybe wrong!
+The p-value is small enough (0.004) for us to confidently reject the null hypothesis. Right? Well, maybe not!
 
-Now, let's carry out the experiment in a slightly different way: 1024 people are given a fair coin, and they flip it. Those that get heads remain, those that get tails, leave the room. We expect about 50% staying and 50% leaving, about 512. Then we repeat the process a second time, and a third, and a fourth, up to a tenth time. We expect one person to still be in the room at the end of this process. 
+Now, let’s carry out the experiment in a slightly different way: 1,024 people are given a fair coin, and they flip it. Those who get heads remain, and those who get tails leave the room. We expect about 50% to stay and 50% to leave – approximately 512 people. Then we repeat the process a second time, a third, a fourth, and so on, up to a tenth time. We expect just one person to still be in the room at the end of this process. If you repeat your experiment many times, you will probably end up rejecting your null hypothesis, even if it is true.
 
-As you can see with the example, the p-value sometimes can be misleading. And it is not just that it's definition is a bit convoluted. Even assuming that we agree with the definition, if you run enough times an experiment, you can always get a p-value that demonstrates what you wanted to demonstrate, just by random chance.
+As you can see from this example, the p-value can sometimes be misleading. And it's not just that its definition is a bit convoluted. Even if we accept the definition, if you repeat an experiment enough times, you can eventually get a p-value that appears to demonstrate what you wanted to demonstrate – purely by random chance.
 
-There are criticisms about the use of p-value, there is a whole approach to statistics, the Bayesian approach, that plainly rejects them. In 2016, the American Statistical Association managed to get a group of statisticians to agree on six principles about p-values:
+There are criticisms regarding the use of p-values; there is an entire approach to statistics, the Bayesian approach, that outright rejects them. In 2016, the American Statistical Association managed to bring together a group of statisticians who agreed on six principles concerning p-values:
 
 1. P-values can indicate how compatible the data are with a specific statistical model
 
-p-values do this by essentially measuring how surprising the data are, given the null hypothesis.
+P-values do this by essentially measuring how surprising the data are, given the null hypothesis.
 
 2. P-values do not measure the probability that the null hypothesis is true
 
-We have discussed this before.
+We have discussed this previously
 
 3. Scientific conclusions and decisions should not be based only on whether a p-value passes a specific threshold
 
-The significance levels threshold are, as we have seen, arbitrary. A *significant* result does not necessarily mean that we have proven discovery.
+The significance thresholds are, as we have seen, arbitrary. A significant result does not necessarily mean that we have proven a discovery.
 
 4. Proper inference requires full reporting and transparency
 
-In the example above when 1024 people flipped 10 times a coin, we have seen that if you repeat the experiment enough times, we will end up with a significant result, even if the null hypothesis is true. We should report our sampling scheme, make data available, describe the methods used so others can replicate our experiment, and confirm whether there is an effect or our result was due to chance.
+In the example above, when 1,024 people each flipped a coin 10 times, we saw that if you repeat the experiment enough times, you will eventually obtain a significant result, even if the null hypothesis is true. We should report our sampling scheme, make data available, and describe the methods used so that others can replicate our experiment and confirm whether there is a real effect or whether our result was due to chance.
 
 5. A p-value does not measure the size of an effect or the importance of a result
 
-A significant result tells us that the observed difference or effect is unlikely to be due to random chance, but does not tell us anything about how large or small this difference (or effect) is.
+A significant result tells us that the observed difference or effect is unlikely to be due to random chance, but it does not tell us anything about how large or small this difference (or effect) is.
 
 6. By itself, a p-value does not provide a good measure of evidence regarding a model or  hypothesis. I.e. p-value close to 0.05 offers only weak evidence against the null hypothesis 
 
 ## Exercises
 
-In this set of exercises there are a few multiple choice questions, to check you have followed the key messages from this module, and then a final question which requires some more thought. We will discuss the final question in this week's webinar - please note down through any major challenges you can think of in this process, either linked to the scenario described or ones which you have faced, or know that you may face in the future, when conducting sampling processes and we can talk through these problems during the session.
-
+In this set of exercises, there are a few questions to check that you have followed the key messages from this module, and that you can use them to answer questions about your data. We will discuss the questions in this week's webinar – please make a note of any major challenges you can identify in this process, either linked to the scenario described or ones you have faced, or anticipate facing in the future when conducting hypothesis testing processes. We can then talk through these problems during the session.
 
 ### Question 1
 
@@ -750,16 +755,16 @@ the 95% confidence interval is, approximately, estimate ± 2xSE. Then, for examp
 
 <details><summary>Click to reveal answer</summary>
 
-The p-value depends on how far from 0 is $\frac{|estimate|}{SE}$. For example, Education has an estimate that is less than the Natural risk disaster, but its p-value is smaller too, because the SE is also smaller. 
+The p-value depends on how far from 0 the ratio $\frac{|estimate|}{SE}$ is. For example, Education has an estimate that is smaller than that of Natural disaster risk, but its p-value is also smaller because its standard error (SE) is smaller as well. 
 
 </details>
 
 
 ### Question 2
 
-we want to test the hypothesis that the mean length in humpback wales is equal for males and females. We have the data collected in 1962 as sample, that we can consider is representative of the population of humpback whales.
+We want to test the hypothesis that the mean length of humpback whales is equal for males and females. We have data collected in 1962 as a sample, which we can consider to be representative of the population of humpback whales.
 
--   $H_0: \mu_M = \mu_F = 0$ 
+-   $H_0: \mu_M = \mu_F$ 
 
  
 ```{r}
