@@ -7,10 +7,7 @@ date: "2025-02-20"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(treemap)
 ```
-
-Add a sentence here
 
 ## Libraries
 ```{r}
@@ -18,14 +15,25 @@ library(tidyverse)
 library(cowplot)
 library(emmeans)
 
+library(treemap)
 library(gt)
 ```
 
 ## Read data
 ```{r}
-Whale<-read.csv("Data/Humpback.csv") %>% filter(length.m.>0)
+
+Whale<-read.csv("Data/Humpback.csv") %>% filter(length.m.>0) %>% filter(Year>=1949 & Year <=1965)
 Whale$sex<-factor(Whale$sex, levels = c("Male", "Female", "Hermaphrodite", "Unknown"))
 
+Whale_62<-filter(Whale,Year==1962)
+
+
+Whale_49<-filter(Whale,Year==1949)
+```
+
+## Data used
+```{r}
+head(Whale, 10)
 ```
 
 
@@ -44,107 +52,9 @@ ggplot(male_year, aes(x=Year,y=Prop_male),)+
   coord_cartesian(ylim = c(0.25,0.90))+
   labs(x="Year",y="% Male")+
     scale_x_continuous(breaks=seq(1950,1964,by=2))+
-    ggtitle("Whales observed in Australia over time (1949-1962): % Male")
+    ggtitle("Whales observed in Australia over time: % Male")
 ```
 
-```{r}
-whale1<-Whale %>%
-  filter(sex =="Male" | sex =="Female") %>%
-  droplevels()
-
-prop.table(table(whale1$sex))
-
-
-```
-
-## Permutation test 1000 perms
-```{r}
-
-mostra1<-sample(whale1$sex,200, replace=FALSE)
-table(mostra1)
-#mostra1
-#  Male Female 
-#   121     79 
-NumOfHeads<-c()
-for (i in 1:10000){
-  mostrai<-sample(c(0,1),200, replace = TRUE, prob=c(0.5, 0.5))
-  propi<-sum(mostrai)
-  NumOfHeads<-c(NumOfHeads,propi)
-}
-
-#sum(permut>=.605)
-sum(NumOfHeads>=121)
-hist(NumOfHeads)
-
-heads<-data.frame(NumOfHeads)
-
-pl1<-ggplot(heads, aes(x=NumOfHeads))+
-  geom_histogram()+
-  geom_vline(xintercept = 121, linetype=2,colour = "red")+
-  labs(x="Year",y="% Male")
-
-pl1
-
-###
-pbinom(121,200,0.5)
-(1-pbinom(121,200,0.5))*100
-
-tots<- seq(1:200)
-binomial.df<-dbinom(tots,200,0.5)*200
-cumbinomial.df<-pbinom(tots,200,0.5)*200
-
-distr.ft<-data.frame(tots, binomial.df, cumbinomial.df)
-
-pl2 <- ggplot(distr.ft, aes(x=tots, y=binomial.df/2))+
-  geom_col()+
-  coord_cartesian(xlim = c(70,130))+
-  labs(x="Num. of Heads",y="% Perc")+
-  geom_vline(xintercept = 121, linetype=2,colour = "red")
-
-pl2
-
-
-pl3 <- ggplot(distr.ft, aes(x=tots, y=cumbinomial.df/2))+
-  geom_col()+
-  coord_cartesian(xlim = c(75,125))+
-  labs(x="Num. of Heads",y="% Perc")+
-  geom_vline(xintercept = 121, linetype=2,colour = "red")
-
-pl3
-
-plot_grid(pl2, pl3, labels = c('A', 'B'), label_size = 12)
-
-100-distr.ft$cumbinomial.df[distr.ft$tots==121]/2
-
-## two-sided
-
-pl4 <- ggplot(distr.ft, aes(x=tots, y=binomial.df/2))+
-  geom_col()+
-  coord_cartesian(xlim = c(70,130))+
-  labs(x="Num. of Males",y="% Perc")+
-  geom_vline(xintercept = c(79,121), linetype=2,colour = "red")
-
-pl4
-
-###
-
-tots<- seq(1:200)
-probx<-dhyper (tots,11000,11000,200)
-distr.ft<-data.frame(tots, probx)
-
-ggplot(distr.ft, aes(x=tots, y=probx))+
-  geom_point()+
-  geom_line()
-
-sum(distr.ft$probx[distr.ft$tots>=121])*100
-
-
-
-
-```
-
-
-## 1962
 ```{r}
 Whale %>%
   filter(Year==1962) %>%
@@ -153,136 +63,192 @@ Whale %>%
         mutate(percentage=scales::percent(n/sum(n),0.1)) %>%
   ungroup() %>%
   gt()
-```
-
-
-
-## Bootsrap 95% CI
-```{r}
-Mostra_Orig<-sample(Whale$length.m.,400, replace = FALSE) 
-
-t.test(Mostra_Orig)
-
-mostra_bootstrap<-c()
-
-for (i in 1:5000){
-  mostrai<-sample(Mostra_Orig,200, replace = TRUE)
-  meani<-mean(mostrai)
-  mostra_bootstrap<-c(mostra_bootstrap,meani)
-}
-
-## 95% Bootstrap CI
-quantile(mostra_bootstrap,probs=c(0.025, 0.975))
-
-## Plot
-boot_mostra<-data.frame(mostra_bootstrap)
-
-ggplot(boot_mostra, aes(x=mostra_bootstrap))+
-  geom_histogram()+
-  labs(x="resample mean")+
-  geom_vline(xintercept = quantile(mostra_bootstrap,probs=c(0.025, 0.975)), linetype=2,colour = "red")
-  
 
 
 ```
 
-## t-test and Wilcoxon test 1 var
+## Permutation test 10000 permutations
 ```{r}
 
-sample1<-sample(Whale$length.m., 100, replace = FALSE)
-summary(sample1)
+set.seed(216486)
 
-mean(sample1)
-sd(sample1)
+heads<-data.frame(Males=rbinom(10000,720,0.5))
 
-t.test(sample1,alternative = "two.sided", mu = 13.5)
-t.test(sample1,alternative = "two.sided", mu = 13.5, conf.level=0.99)
-t.test(sample1,alternative = "two.sided", mu = 13.4)
-t.test(sample1,alternative = "two.sided", mu = 13.6)
-t.test(sample1,alternative = "two.sided", mu = 13.7)
+pl1<-ggplot(heads, aes(x=Males))+
+  geom_bar()+
+  geom_vline(xintercept = 409, linetype=2,colour = "red")+
+  labs(x="Number of Males",y="Number of Simulations")
 
-## wilcoxon test
-wilcox.test(sample1,alternative = "two.sided", mu = 13.5)
-wilcox.test(sample1,alternative = "two.sided", mu = 13.4)
-wilcox.test(sample1,alternative = "two.sided", mu = 13.6)
+pl1
 
-t.test(sample1,alternative = "two.sided", mu = 13.7)
+table(heads>=409)
 
-ggplot(as.data.frame(sample1), aes(x=sample1))+
-  geom_histogram(bins=25)+
-  labs(x="Length(m)")+
-  geom_vline(xintercept = 13.5, linetype=2,colour = "red")
 ```
 
-## t-test and Wilcoxon test 2 var
+## Density and Cumulative distribution funcion
+```{r fig3, out.width="80%", echo = FALSE}
+
+tots<- seq(1:720)
+binomial.df<-dbinom(tots,720,0.5)
+cumbinomial.df<-pbinom(tots,720,0.5)
+
+distr.ft<-data.frame(tots, binomial.df, cumbinomial.df)
+
+pl2 <- ggplot(distr.ft, aes(x=tots, y=binomial.df))+
+  geom_line()+
+  coord_cartesian(xlim = c(300,420))+
+  labs(x="Num. of Males",y="Proportion")+
+  geom_vline(xintercept = 409, linetype=2,colour = "red")
+
+pl2
+
+
+pl3 <- ggplot(distr.ft, aes(x=tots, y=cumbinomial.df))+
+  geom_line()+
+  coord_cartesian(xlim = c(300,420))+
+  labs(x="Number of Males",y="Cumulative Proportion")+
+  geom_vline(xintercept = 409, linetype=2,colour = "red")
+
+pl3
+
+plot_grid(pl2, pl3, labels = c('A', 'B'), label_size = 12)
+```
+
+## 2-sided p-value - density function
+```{r, out.width="80%", echo = FALSE}
+pl2+
+  geom_vline(xintercept = 720-409, linetype=2,colour = "red")
+
+```
+
+
+## p-value to test p_M=0.5
 ```{r}
+prop.test(409,720, p=0.5)
 
-sample02<- sample(seq(1:23550), 200, replace = FALSE)
+```
 
-sample2<-Whale[sample02,]  
+## 95% Confidence Interval to test 2 Ho
+```{r}
+mean_length <- mean(Whale_49$length.m., na.rm = TRUE)
+sd_length <- sd(Whale_49$length.m., na.rm = TRUE)
+n <- sum(!is.na(Whale_49$length.m.))
+se <- sd_length / sqrt(n)
 
-length(sample2$length.m.[sample2$sex=="Male"])
-length(sample2$length.m.[sample2$sex=="Female"])
+# 95% Confidence Interval
+alpha <- 0.05
+t_critical <- qt(1 - alpha/2, df = n - 1)
+lower_ci <- mean_length - t_critical * se
+upper_ci <- mean_length + t_critical * se
 
-mean(sample2$length.m.[sample2$sex=="Male"])
-mean(sample2$length.m.[sample2$sex=="Female"])
+# Print the CI
+cat("95% Confidence Interval: [", lower_ci, ",", upper_ci, "]\n")
 
-sd(sample2$length.m.[sample2$sex=="Male"])
-sd(sample2$length.m.[sample2$sex=="Female"])
+# Create a plot of the mean with its confidence interval
+ggplot(data = data.frame(mean = mean_length, lower = lower_ci, upper = upper_ci), aes(x = 1, y = mean)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
+  coord_flip() +
+  geom_hline(yintercept = 13, linetype=2,colour = "blue")+
+  geom_hline(yintercept = 13.2, linetype=2,colour = "red")+
+  labs(
+    title = "95% Confidence Interval of Length and Ho",
+    x = "",
+    y = "Length"
+  )
+```
 
-t.test(sample2$length.m.[sample2$sex=="Male"],sample2$length.m.[sample2$sex=="Female"],alternative = "two.sided")
+
+## 1-sample t-test
+```{r}
+Whale_49 %>%
+    group_by(Year) %>%
+      summarise(n=n(),"Mean Length"=mean(length.m.),"SD Length"=sd(length.m.)) %>%
+  ungroup() %>%
+  gt()%>%
+    fmt_number(columns =  3:4,decimals = 2)
+
+Whale_49 %>%
+  ggplot(aes(x=length.m.))+
+  geom_bar()+
+  xlab("Length (m)")+
+  ylab("Count")+
+  geom_vline(xintercept = 13.01,col="red",linewidth=2)+
+    geom_vline(xintercept = 13.0,col="blue",linewidth=2,linetype=2)
+
+t.test(Whale_49$length.m.,mu = 13.0)
 
 
-wilcox.test(sample2$length.m.[sample2$sex=="Male"],sample2$length.m.[sample2$sex=="Female"],alternative = "two.sided")
+t.test(Whale_49$length.m.,mu = 13.0, conf.level = 0.99)
+
+t.test()
+
+```
 
 
-ggplot(sample2, aes(x=length.m., group = sex))+
-  geom_histogram(bins=20)+
-  labs(x="Length(m)")+
+## 2-sample t-test
+```{r}
+Whale_49 %>%
+    group_by(sex) %>%
+      summarise(n=n(),"Mean Length"=mean(length.m.),"SD Length"=sd(length.m.)) %>%
+  ungroup() %>%
+  gt()%>%
+    fmt_number(columns =  3:4,decimals = 2)
+
+
+Whale_49 %>%
+  ggplot(aes(x=length.m., group = sex))+
+  geom_bar()+
+  xlab("Length (m)")+
+  ylab("Count")+
   facet_wrap(~sex,nrow =2)
 
+
+t.test(length.m.~sex, data=Whale_49)
 ```
 
-## F-test to compare 2 var
+
+## F-test to compare 2 variances
 ```{r}
-var.test(sample2$length.m.[sample2$sex=="Male"],sample2$length.m.[sample2$sex=="Female"],alternative = "two.sided")
-
-
+var.test(length.m.~sex, data=Whale_49)
 ```
+
 
 
 ## Comparing proportions
 ```{r}
-sample2$sex_cod<-ifelse(sample2$sex=="Male",1,0)
 
-prop.test(sample2$sex_cod, n=1, p=0.5)
-prop.test(113, n=200, p=0.5)
-
-sample2$period<-ifelse(sample2$Year<1956, 0,1)
-
-table(sample2$sex, sample2$period)
-
-prop.test(c(59,45), n=c(104,96))
+prop.test(10, n=10, p=0.5)
 
 ```
 
-## ANOVA
+## Exercises, Question 2
 ```{r}
-sample2$period2<-ifelse(sample2$Year<1930, "1925-1929",
-                        ifelse(sample2$Year<1955, "1949-1954",
-                        ifelse(sample2$Year<1960, "1955-1959","1960-1963")))
+Whale_49 %>%
+    group_by(sex) %>%
+      summarise(n=n(),"Mean Length"=mean(length.m.),"SD Length"=sd(length.m.)) %>%
+  ungroup() %>%
+  gt()%>%
+    fmt_number(columns =  3:4,decimals = 2)
+```
+ 
+ 
+```{r, out.width="80%", echo = FALSE}
 
-ggplot(sample2, aes(x=length.m., group = period2))+
-  geom_histogram(bins=10)+
-  labs(x="Length(m)")+
-  facet_wrap(~period2,nrow =4)
+Whale_49 %>%
+  ggplot(aes(x=length.m., group = sex))+
+  geom_bar()+
+  xlab("Length (m)")+
+  ylab("Count")+
+  facet_wrap(~sex,nrow =2)
 
-model_ANOVA<-lm(length.m.~period2, data=sample2)
-summary(model_ANOVA)
-
-par(mfrow=c(2,2))
-plot(model_ANOVA)
-
-kruskal.test(length.m.~period2, data=sample2)
 ```
 
+```{r}
+t.test(length.m.~sex, data=Whale_49, alternative="two.sided")
+
+t.test(length.m.~sex, data=Whale_49, alternative="less")
+
+t.test(length.m.~sex, data=Whale_49, alternative="greater")
+
+```

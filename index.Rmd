@@ -762,7 +762,7 @@ The p-value depends on how far from 0 the ratio $\frac{|estimate|}{SE}$ is. For 
 
 ### Question 2
 
-We want to test the hypothesis that the mean length of humpback whales is equal for males and females. We have data collected in 1962 as a sample, which we can consider to be representative of the population of humpback whales.
+We want to test the hypothesis that the mean length of humpback whales is equal for males and females. We have data collected in 1949 as a sample, which we can consider to be representative of the population of humpback whales.
 
 -   $H_0: \mu_M = \mu_F$ 
 
@@ -779,7 +779,7 @@ Whale_49 %>%
  
 ```{r, out.width="80%", echo = FALSE}
 
-Whale_62 %>%
+Whale_49 %>%
   ggplot(aes(x=length.m., group = sex))+
   geom_bar()+
   xlab("Length (m)")+
@@ -797,7 +797,7 @@ Choose the alternative hypothesis ans see if/how the result of the test changes:
 
 
 ```{r}
-t.test(length.m.~sex, data=Whale_62, alternative="two.sided")
+t.test(length.m.~sex, data=Whale_49, alternative="two.sided")
 
 ```
 
@@ -806,7 +806,7 @@ t.test(length.m.~sex, data=Whale_62, alternative="two.sided")
 
 
 ```{r}
-t.test(length.m.~sex, data=Whale_62, alternative="less")
+t.test(length.m.~sex, data=Whale_49, alternative="less")
 
 ```
 
@@ -815,7 +815,7 @@ t.test(length.m.~sex, data=Whale_62, alternative="less")
 
 
 ```{r}
-t.test(length.m.~sex, data=Whale_62, alternative="greater")
+t.test(length.m.~sex, data=Whale_49, alternative="greater")
 
 ```
 
